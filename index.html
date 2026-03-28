@@ -161,6 +161,47 @@
     .level-ref-table td:first-child { font-size: 15px; }
   }
 
+  /* ── OVERVIEW PAGE ── */
+  .overview-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .overview-year-label { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.06em; color: var(--text); min-width: 80px; text-align: center; line-height: 1; }
+  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .month-summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 14px 16px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .month-summary-card:hover { border-color: var(--accent); background: #0f120a; }
+  .month-summary-card.empty-month { cursor: default; opacity: 0.4; }
+  .month-summary-card.empty-month:hover { border-color: var(--border); background: var(--surface); }
+  .month-summary-card.current-month { border-color: var(--accent); }
+  .mscard-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.07em; color: var(--text); line-height: 1; }
+  .mscard-weight { font-size: 20px; font-family: 'Bebas Neue', sans-serif; color: var(--accent); letter-spacing: 0.04em; line-height: 1.1; }
+  .mscard-weight-label { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .mscard-workouts { font-size: 10px; color: #888; letter-spacing: 0.06em; margin-top: 2px; }
+  .mscard-milestone { font-size: 9px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; border-top: 1px solid #1e1e1e; padding-top: 5px; }
+  .mscard-arrow { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; padding-top: 6px; transition: color 0.12s; }
+  .month-summary-card:hover .mscard-arrow { color: var(--accent); }
+
+  /* heatmap bars */
+  .mscard-bars { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .mscard-bar-row { display: flex; align-items: center; gap: 6px; }
+  .mscard-bar-label { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); width: 22px; flex-shrink: 0; }
+  .mscard-bar-track { flex: 1; height: 5px; background: #1e1e1e; overflow: hidden; }
+  .mscard-bar-fill { height: 100%; transition: width 0.4s ease; }
+  .mscard-bar-fill.workouts-fill { background: linear-gradient(90deg, #2d6a2d, #c8ff00); }
+  .mscard-bar-fill.weight-fill   { background: linear-gradient(90deg, #1a3a5c, #ff7043); }
+
+  @media (max-width: 600px) {
+    .overview-grid { grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .overview-year-label { font-size: 28px; }
+    .mscard-name { font-size: 15px; }
+    .mscard-weight { font-size: 18px; }
+  }
+  @media (max-width: 360px) {
+    .overview-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+  }
+
   /* ── SAFARI / WEBKIT FIXES ── */
   input, select, textarea, button {
     -webkit-appearance: none;
@@ -258,6 +299,7 @@
 
 <nav class="nav-tabs">
   <button class="nav-tab active" onclick="showPage('calendar', this)">Calendar</button>
+  <button class="nav-tab" onclick="showPage('overview', this)">Overview</button>
   <button class="nav-tab" onclick="showPage('skills', this)">Skills</button>
 </nav>
 
@@ -282,6 +324,7 @@
       <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
       <div class="month-label" id="monthLabel"></div>
       <button class="nav-btn" onclick="changeMonth(1)">›</button>
+      <button class="btn" id="todayBtn" onclick="goToToday()" style="display:none;font-size:9px;padding:5px 10px;letter-spacing:0.1em">Today</button>
     </div>
     <div id="syncStatus" style="font-size:10px;letter-spacing:0.1em;color:var(--muted);cursor:pointer" onclick="manualSync()" title="Click to sync now">○ Not connected</div>
     <div style="display:flex;gap:6px;margin-left:auto">
@@ -292,6 +335,7 @@
     <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="handleImportCSV(event)">
   </div>
 
+  <div id="calSwipeZone">
   <div class="calendar-grid" id="calGrid">
     <div class="day-header">Sun</div>
     <div class="day-header">Mon</div>
@@ -300,6 +344,7 @@
     <div class="day-header">Thu</div>
     <div class="day-header">Fri</div>
     <div class="day-header">Sat</div>
+  </div>
   </div>
 
   <div class="legend">
@@ -315,6 +360,17 @@
   </div>
 </div>
 
+<!-- OVERVIEW PAGE -->
+<div class="page" id="page-overview">
+  <div class="page-title">Overview</div>
+  <div class="overview-controls">
+    <button class="nav-btn" onclick="changeOverviewYear(-1)">‹</button>
+    <div class="overview-year-label" id="overviewYearLabel"></div>
+    <button class="nav-btn" onclick="changeOverviewYear(1)">›</button>
+  </div>
+  <div class="overview-grid" id="overviewGrid"></div>
+</div>
+
 <!-- SKILLS PAGE -->
 <div class="page" id="page-skills">
   <div class="page-title">Skill Levels</div>
@@ -328,30 +384,7 @@
 
   <div class="level-ref-card">
     <div class="level-ref-title">Level Reference Guide</div>
-    <div style="overflow-x:auto">
-    <table class="level-ref-table">
-      <thead>
-        <tr>
-          <th>Lvl</th>
-          <th>Planche Push</th>
-          <th>Front Lever</th>
-          <th>HSPU</th>
-          <th>Nordic Curl</th>
-          <th>1-Arm Chin</th>
-          <th>SL Squat</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>Zero weight</td><td>Zero weight</td><td>Zero weight</td><td>Zero weight</td><td>2-arm hang</td><td>2-leg squat</td></tr>
-        <tr><td>2</td><td>Shoulders ↔ rings</td><td>Shoulders ↔ rings</td><td>Pike</td><td>Zero weight</td><td>1-arm hang</td><td>Negative SLS</td></tr>
-        <tr><td>3</td><td>Tuck</td><td>Tuck</td><td>Feet elevated</td><td>Zero weight</td><td>2-arm partial</td><td>Positive SLS</td></tr>
-        <tr><td>4</td><td>Hips level with shoulders</td><td>Hips level with shoulders</td><td>Shoulder stand</td><td>No hands, partial ROM</td><td>2-arm full ROM</td><td>10kg SLS</td></tr>
-        <tr><td>5</td><td>Extended hips</td><td>Extended hips</td><td>Strap-assisted</td><td>No hands, negative</td><td>Partial neg OAC</td><td>20kg SLS</td></tr>
-        <tr><td>6</td><td>Advanced tuck (90°)</td><td>Advanced tuck (90°)</td><td>Unassisted</td><td>No hands, positive</td><td>Full ROM negative</td><td>30kg SLS</td></tr>
-        <tr><td>7</td><td>Full lay</td><td>Full lay</td><td>Side to side</td><td>Partial weighted</td><td>Partial positive</td><td>40kg SLS</td></tr>
-      </tbody>
-    </table>
-    </div>
+    <div style="overflow-x:auto" id="levelRefTableWrap"></div>
   </div>
 </div>
 
@@ -582,12 +615,12 @@ const EX = {};
 EXERCISES.forEach(e => EX[e.v] = e);
 
 const SKILLS = [
-  { id: 'hspu',    name: 'Handstand Push',      color: '#4fc3f7' },
-  { id: 'oac',     name: 'One-Arm Chinup',       color: '#81d4fa' },
-  { id: 'planche', name: 'Planche Push',         color: '#ff7043' },
-  { id: 'lever',   name: 'Lever Rows',           color: '#ffab91' },
-  { id: 'slsq',    name: 'Weighted SL Squats',   color: '#ce93d8' },
-  { id: 'nordic',  name: 'Nordic Curls',         color: '#a5d6a7' },
+  { id: 'hspu',    name: 'Handstand Push',  color: '#4fc3f7', levels: ['Zero weight','Pike','Feet elevated','Shoulder stand','Strap-assisted','Unassisted','Side to side'] },
+  { id: 'oac',     name: 'One-Arm Chinup',  color: '#81d4fa', levels: ['2-arm hang','1-arm hang','2-arm partial','2-arm full ROM','Partial neg OAC','Full ROM negative','Partial positive'] },
+  { id: 'planche', name: 'Planche Push',    color: '#ff7043', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
+  { id: 'lever',   name: 'Lever Rows',      color: '#ffab91', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
+  { id: 'slsq',    name: 'Pistol Squats',   color: '#ce93d8', levels: ['2-leg squat','Negative SLS','Positive SLS','10kg SLS','20kg SLS','30kg SLS','40kg SLS'] },
+  { id: 'nordic',  name: 'Nordic Curls',    color: '#a5d6a7', levels: ['Zero weight','Zero weight','Zero weight','No hands, partial ROM','No hands, negative','No hands, positive','Partial weighted'] },
 ];
 
 // ══════════════════════════════
@@ -618,7 +651,227 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'skills') renderSkillsPage();
+  if (id === 'skills')   renderSkillsPage();
+  if (id === 'overview') renderOverview();
+}
+
+// ══════════════════════════════
+//  OVERVIEW
+// ══════════════════════════════
+let overviewYear = new Date().getFullYear();
+
+function changeOverviewYear(dir) {
+  overviewYear += dir;
+  renderOverview();
+}
+
+function renderOverview() {
+  document.getElementById('overviewYearLabel').textContent = overviewYear;
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const today = new Date();
+  const grid  = document.getElementById('overviewGrid');
+  grid.innerHTML = '';
+
+  // For milestone detection
+  const allSkillHistory = {};
+  SKILLS.forEach(sk => {
+    allSkillHistory[sk.id] = (skillData[sk.id]?.history || [])
+      .slice().sort((a,b) => a.date.localeCompare(b.date));
+  });
+
+  // ── First pass: gather all 12 months' raw values for normalisation ──
+  const monthData = [];
+  for (let m = 0; m < 12; m++) {
+    const prefix    = `${overviewYear}-${String(m+1).padStart(2,'0')}`;
+    const monthKeys = Object.keys(calData).filter(k => k.startsWith(prefix));
+    const weights   = monthKeys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w) && w > 0);
+    const avgWeight    = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
+    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w).length), 0);
+
+    const milestones = [];
+    SKILLS.forEach(sk => {
+      const hist = allSkillHistory[sk.id];
+      if (!hist.length) return;
+      const monthStart = `${overviewYear}-${String(m+1).padStart(2,'0')}-01`;
+      const monthEnd   = `${overviewYear}-${String(m+1).padStart(2,'0')}-31`;
+      const prevBest = hist.filter(h => h.date < monthStart).reduce((max,h) => Math.max(max,h.level), 0);
+      const thisMonthBest = hist.filter(h => h.date >= monthStart && h.date <= monthEnd).reduce((max,h) => Math.max(max,h.level), 0);
+      if (thisMonthBest > prevBest && thisMonthBest > 0) milestones.push(`${sk.name} → L${thisMonthBest}`);
+    });
+
+    monthData.push({ avgWeight, workoutCount, milestones });
+  }
+
+  // ── Normalise across the year (past months only) ──
+  const pastAvgWeights   = monthData.map(d => d.avgWeight).filter(v => v !== null);
+  const pastWorkouts     = monthData.map(d => d.workoutCount).filter(v => v > 0);
+
+  // Weight: use a narrow band (minW-0.5 to maxW+0.5) so variation is visible
+  const minW = pastAvgWeights.length ? Math.min(...pastAvgWeights) : 0;
+  const maxW = pastAvgWeights.length ? Math.max(...pastAvgWeights) : 1;
+  const weightRange = Math.max(maxW - minW, 0.5); // ensure non-zero
+
+  const maxWorkouts = pastWorkouts.length ? Math.max(...pastWorkouts) : 1;
+
+  // ── Second pass: render cards ──
+  for (let m = 0; m < 12; m++) {
+    const { avgWeight, workoutCount, milestones } = monthData[m];
+    const isEmpty   = !avgWeight && workoutCount === 0 && milestones.length === 0;
+    const isCurrent = overviewYear === today.getFullYear() && m === today.getMonth();
+    const isFuture  = new Date(overviewYear, m, 1) > today;
+
+    const card = document.createElement('div');
+    card.className = 'month-summary-card'
+      + (isEmpty || isFuture ? ' empty-month' : '')
+      + (isCurrent ? ' current-month' : '');
+
+    // Month name
+    const nameEl = document.createElement('div');
+    nameEl.className = 'mscard-name';
+    nameEl.textContent = MONTHS[m];
+    card.appendChild(nameEl);
+
+    if (!isFuture) {
+      // Weight value + change annotation
+      const wRow = document.createElement('div');
+      wRow.style.cssText = 'display:flex;align-items:baseline;gap:6px';
+
+      const wEl = document.createElement('div');
+      wEl.className = 'mscard-weight';
+      wEl.textContent = avgWeight ? avgWeight.toFixed(1) + ' kg' : '—';
+      wRow.appendChild(wEl);
+
+      // Weight change vs previous month with data
+      if (avgWeight !== null) {
+        let prevAvg = null;
+        for (let pm = m - 1; pm >= 0; pm--) {
+          if (monthData[pm]?.avgWeight !== null && monthData[pm]?.avgWeight !== undefined) {
+            prevAvg = monthData[pm].avgWeight; break;
+          }
+        }
+        if (prevAvg !== null) {
+          const delta = avgWeight - prevAvg;
+          if (Math.abs(delta) >= 0.5) {
+            const annEl = document.createElement('div');
+            annEl.style.cssText = `font-size:10px;font-weight:600;color:${delta > 0 ? '#ff7043' : '#4fc3f7'};letter-spacing:0.04em;line-height:1`;
+            annEl.textContent = (delta > 0 ? '▲' : '▼') + Math.abs(delta).toFixed(1);
+            wRow.appendChild(annEl);
+          }
+        }
+      }
+      card.appendChild(wRow);
+
+      const wLbl = document.createElement('div');
+      wLbl.className = 'mscard-weight-label';
+      wLbl.textContent = 'avg weight';
+      card.appendChild(wLbl);
+
+      // Workout count
+      const woEl = document.createElement('div');
+      woEl.className = 'mscard-workouts';
+      woEl.textContent = workoutCount
+        ? `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`
+        : 'No workouts logged';
+      card.appendChild(woEl);
+
+      // Skills dots + milestone star on same row
+      const skillsRow = document.createElement('div');
+      skillsRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;align-items:center';
+      const monthEnd = `${overviewYear}-${String(m+1).padStart(2,'0')}-31`;
+      let anySkill = false;
+      SKILLS.forEach(sk => {
+        const hist = (skillData[sk.id]?.history || [])
+          .filter(h => h.date <= monthEnd)
+          .sort((a,b) => a.date.localeCompare(b.date));
+        if (!hist.length) return;
+        const levelThen = hist[hist.length-1].level;
+        anySkill = true;
+        const dot = document.createElement('div');
+        dot.title = `${sk.name}: L${levelThen}`;
+        dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${sk.color};opacity:${0.3 + (levelThen/7)*0.7};flex-shrink:0`;
+        skillsRow.appendChild(dot);
+      });
+      if (milestones.length) {
+        const starEl = document.createElement('span');
+        starEl.title = milestones.join(', ');
+        starEl.style.cssText = 'font-size:10px;color:var(--accent);line-height:1;margin-left:6px';
+        starEl.textContent = '★';
+        skillsRow.appendChild(starEl);
+        anySkill = true;
+      }
+      if (anySkill) card.appendChild(skillsRow);
+
+      // ── Heatmap bars ──
+      if (!isEmpty) {
+        const barsEl = document.createElement('div');
+        barsEl.className = 'mscard-bars';
+
+        // Workouts bar (green gradient)
+        const woPct = maxWorkouts > 0 ? Math.round((workoutCount / maxWorkouts) * 100) : 0;
+        barsEl.innerHTML += `
+          <div class="mscard-bar-row">
+            <div class="mscard-bar-label">WO</div>
+            <div class="mscard-bar-track">
+              <div class="mscard-bar-fill workouts-fill" style="width:${woPct}%"></div>
+            </div>
+          </div>`;
+
+        // Weight bar (blue→orange gradient)
+        const wtPct = avgWeight !== null
+          ? Math.round(Math.min(((avgWeight - minW) / weightRange) * 100, 100))
+          : 0;
+        barsEl.innerHTML += `
+          <div class="mscard-bar-row">
+            <div class="mscard-bar-label">WT</div>
+            <div class="mscard-bar-track">
+              <div class="mscard-bar-fill weight-fill" style="width:${avgWeight !== null ? Math.max(wtPct, 8) : 0}%"></div>
+            </div>
+          </div>`;
+
+        card.appendChild(barsEl);
+      }
+
+      // Tap arrow
+      if (!isEmpty) {
+        const arrEl = document.createElement('div');
+        arrEl.className = 'mscard-arrow';
+        arrEl.textContent = 'Open month →';
+        card.appendChild(arrEl);
+
+        card.addEventListener('click', () => {
+          cy = overviewYear; cm = m;
+          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('page-calendar').classList.add('active');
+          document.querySelector('.nav-tab').classList.add('active');
+          renderCalendar();
+          window.scrollTo(0, 0);
+        });
+      }
+    }
+
+    grid.appendChild(card);
+  }
+
+  // ── Legend ──
+  let legend = document.getElementById('overviewLegend');
+  if (!legend) {
+    legend = document.createElement('div');
+    legend.id = 'overviewLegend';
+    legend.style.cssText = 'display:flex;gap:20px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)';
+    document.getElementById('page-overview').appendChild(legend);
+  }
+  legend.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
+      <div style="width:32px;height:5px;background:linear-gradient(90deg,#2d6a2d,#c8ff00)"></div>
+      Workouts (0 → ${maxWorkouts})
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
+      <div style="width:32px;height:5px;background:linear-gradient(90deg,#1a3a5c,#ff7043)"></div>
+      Weight (${minW.toFixed(1)} → ${maxW.toFixed(1)} kg)
+    </div>`;
 }
 
 // ══════════════════════════════
@@ -700,6 +953,7 @@ function renderCalendar() {
   }
 
   updateStats();
+  updateTodayBtn();
   renderWeightChart();
 }
 
@@ -716,7 +970,7 @@ function updateStats() {
 }
 
 // ══════════════════════════════
-//  WEIGHT CHART
+//  WEIGHT CHART (with trend line)
 // ══════════════════════════════
 function renderWeightChart() {
   const canvas = document.getElementById('weightChart');
@@ -758,6 +1012,7 @@ function renderWeightChart() {
   const xOf = i => pL + (weeks.length<2 ? cW/2 : (i/(weeks.length-1))*cW);
   const yOf = v => pT + cH - ((v-minV)/range)*cH;
 
+  // Grid lines
   for (let g = 0; g <= 3; g++) {
     const gv = minV + (range/3)*g, gy = yOf(gv);
     ctx.strokeStyle = '#1d1d1d'; ctx.lineWidth = 1;
@@ -766,17 +1021,62 @@ function renderWeightChart() {
     ctx.fillText(gv.toFixed(1), pL-4, gy+3);
   }
 
+  // Area fill
   ctx.beginPath();
   avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
   ctx.lineTo(xOf(avgs.length-1), H-pB); ctx.lineTo(xOf(0), H-pB); ctx.closePath();
-  const g = ctx.createLinearGradient(0, pT, 0, H-pB);
-  g.addColorStop(0, 'rgba(200,255,0,0.16)'); g.addColorStop(1, 'rgba(200,255,0,0.01)');
-  ctx.fillStyle = g; ctx.fill();
+  const grad = ctx.createLinearGradient(0, pT, 0, H-pB);
+  grad.addColorStop(0, 'rgba(200,255,0,0.16)'); grad.addColorStop(1, 'rgba(200,255,0,0.01)');
+  ctx.fillStyle = grad; ctx.fill();
 
+  // Data line
   ctx.beginPath(); ctx.strokeStyle = '#c8ff00'; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
   avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
   ctx.stroke();
 
+  // ── Per-year trend lines (resets each January) ──
+  // Group week indices by year, run a separate regression per year
+  const yearGroups = {};
+  weeks.forEach((w, i) => {
+    const yr = w.slice(0, 4);
+    if (!yearGroups[yr]) yearGroups[yr] = [];
+    yearGroups[yr].push({ i, v: avgs[i] });
+  });
+
+  Object.values(yearGroups).forEach(pts => {
+    if (pts.length < 2) return;
+    const n = pts.length;
+    const xs = pts.map((_,j) => j);
+    const ys = pts.map(p => p.v);
+    const meanX = xs.reduce((a,b)=>a+b,0)/n;
+    const meanY = ys.reduce((a,b)=>a+b,0)/n;
+    const ssXX = xs.reduce((s,x)=>s+(x-meanX)**2,0);
+    const ssXY = xs.reduce((s,x,j)=>s+(x-meanX)*(ys[j]-meanY),0);
+    const slope = ssXX === 0 ? 0 : ssXY/ssXX;
+    const intercept = meanY - slope*meanX;
+
+    const x0 = xOf(pts[0].i),   y0 = yOf(intercept);
+    const x1 = xOf(pts[n-1].i), y1 = yOf(slope*(n-1)+intercept);
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // direction label at end of each segment
+    const dir = slope > 0.05 ? '▲' : slope < -0.05 ? '▼' : '—';
+    const col = slope > 0.05 ? '#ff7043' : slope < -0.05 ? '#4fc3f7' : '#555';
+    ctx.fillStyle = col;
+    ctx.font = "8px 'DM Mono',monospace";
+    ctx.textAlign = 'right';
+    ctx.fillText(dir, x1 - 2, y1 - 5);
+  });
+
+  // Dots + x-axis labels
   const labelStep = Math.max(1, Math.floor(weeks.length/7));
   avgs.forEach((v,i) => {
     ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2);
@@ -788,6 +1088,52 @@ function renderWeightChart() {
     }
   });
 }
+
+// ══════════════════════════════
+//  TODAY BUTTON
+// ══════════════════════════════
+function goToToday() {
+  const now = new Date();
+  cy = now.getFullYear();
+  cm = now.getMonth();
+  renderCalendar();
+}
+
+function updateTodayBtn() {
+  const now = new Date();
+  const btn = document.getElementById('todayBtn');
+  if (!btn) return;
+  const isCurrentMonth = cy === now.getFullYear() && cm === now.getMonth();
+  btn.style.display = isCurrentMonth ? 'none' : 'inline-block';
+}
+
+// ══════════════════════════════
+//  SWIPE TO CHANGE MONTH
+// ══════════════════════════════
+(function initSwipe() {
+  let touchStartX = 0, touchStartY = 0;
+  const SWIPE_THRESHOLD = 50;
+  const ANGLE_THRESHOLD = 35; // degrees — ignore diagonal swipes
+
+  function onTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+
+  function onTouchEnd(e) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+    const isHorizontal = angle < ANGLE_THRESHOLD || angle > (180 - ANGLE_THRESHOLD);
+    if (!isHorizontal || Math.abs(dx) < SWIPE_THRESHOLD) return;
+    // only fire when calendar page is active
+    if (!document.getElementById('page-calendar').classList.contains('active')) return;
+    changeMonth(dx < 0 ? 1 : -1);
+  }
+
+  document.addEventListener('touchstart', onTouchStart, { passive: true });
+  document.addEventListener('touchend',   onTouchEnd,   { passive: true });
+})();
 
 // ══════════════════════════════
 //  MODAL
@@ -876,7 +1222,12 @@ function renderSkillsPage() {
     card.appendChild(levelsEl);
     const meta = document.createElement('div');
     meta.className = 'skill-meta';
-    meta.textContent = rec.level ? `Level ${rec.level} of 7` : 'Not yet assessed';
+    if (rec.level) {
+      const desc = sk.levels ? sk.levels[rec.level - 1] : '';
+      meta.textContent = `Level ${rec.level} of 7${desc ? ' — ' + desc : ''}`;
+    } else {
+      meta.textContent = 'Not yet assessed';
+    }
     card.appendChild(meta);
     if (rec.history && rec.history.length) {
       const last = rec.history[rec.history.length-1];
@@ -889,6 +1240,7 @@ function renderSkillsPage() {
   });
   renderSkillHistoryChart();
   renderSkillLegend();
+  renderLevelRefTable();
 }
 
 async function setSkillLevel(id, level) {
@@ -905,13 +1257,71 @@ async function setSkillLevel(id, level) {
   await pushToCloud();
 }
 
+function renderLevelRefTable() {
+  const wrap = document.getElementById('levelRefTableWrap');
+  if (!wrap) return;
+
+  // Column order matches the reference table: planche, lever, hspu, nordic, oac, slsq
+  const COL_ORDER = ['planche','lever','hspu','nordic','oac','slsq'];
+  const COL_HEADS = ['Planche Push','Front Lever','HSPU','Nordic Curl','1-Arm Chin','Pistol Squat'];
+
+  // Current selected levels keyed by skill id
+  const selectedLevels = {};
+  SKILLS.forEach(sk => { selectedLevels[sk.id] = (skillData[sk.id]?.level) || 0; });
+
+  // skill color by id
+  const skColor = {};
+  SKILLS.forEach(sk => { skColor[sk.id] = sk.color; });
+
+  let html = '<table class="level-ref-table"><thead><tr><th>Lvl</th>';
+  COL_HEADS.forEach(h => { html += `<th>${h}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  for (let l = 1; l <= 7; l++) {
+    // Is this row a selected level for ANY skill?
+    const matchedSkills = COL_ORDER.filter(id => selectedLevels[id] === l);
+    const isHighlighted = matchedSkills.length > 0;
+
+    const rowStyle = isHighlighted ? 'background:#1a1a0d;' : '';
+    html += `<tr style="${rowStyle}">`;
+
+    // Level number cell
+    html += `<td style="${isHighlighted ? `color:var(--accent)` : ''}">${l}</td>`;
+
+    // Each skill column
+    COL_ORDER.forEach(id => {
+      const sk = SKILLS.find(s => s.id === id);
+      const desc = sk?.levels?.[l-1] || '';
+      const isThisSkillSelected = selectedLevels[id] === l;
+      const cellStyle = isThisSkillSelected
+        ? `color:${skColor[id]};font-weight:500;`
+        : '';
+      html += `<td style="${cellStyle}">${desc}</td>`;
+    });
+
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
 function renderSkillLegend() {
   const leg = document.getElementById('skillLegend');
   leg.innerHTML = '';
   SKILLS.forEach(sk => {
+    const rec = skillData[sk.id] || { level: 0 };
     const item = document.createElement('div');
     item.className = 'skill-legend-item';
-    item.innerHTML = `<div class="skill-legend-dot" style="background:${sk.color}"></div>${sk.name}`;
+    const isActive = rec.level > 0;
+    item.style.cssText = isActive
+      ? `color:${sk.color};opacity:1;font-weight:500`
+      : 'opacity:0.4';
+    item.innerHTML = `
+      <div class="skill-legend-dot" style="background:${sk.color};${isActive ? 'opacity:1' : 'opacity:0.4'}"></div>
+      <span>${sk.name}</span>
+      ${isActive ? `<span style="font-size:8px;letter-spacing:0.06em;opacity:0.7">L${rec.level}</span>` : ''}
+    `;
     leg.appendChild(item);
   });
 }
