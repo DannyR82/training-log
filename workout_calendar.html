@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #131313;
+    --surface2: #1a1a1a;
+    --surface3: #202020;
+    --border: #252525;
+    --border2: #2e2e2e;
+    --accent: #c8ff00;
+    --text: #e0e0e0;
+    --muted: #555;
+    --muted2: #333;
+    --c-vp: #4fc3f7;
+    --c-vc: #81d4fa;
+    --c-hp: #ff7043;
+    --c-hc: #ffab91;
+    --c-leg: #ce93d8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; }
+  button, a, [onclick] { touch-action: manipulation; }
+
+  /* NAV */
+  .nav-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 28px; }
+  .nav-tab { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 16px 18px; cursor: pointer; border: none; border-bottom: 2px solid transparent; background: none; transition: all 0.15s; }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .page { display: none; padding: 26px 26px 60px; }
+  .page.active { display: block; }
+
+  /* HEADER */
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(30px, 5vw, 56px); letter-spacing: 0.05em; color: var(--accent); line-height: 1; margin-bottom: 24px; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 12px 14px; }
+  .stat-label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; color: var(--accent); line-height: 1; }
+  .stat-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-top: 1px; }
+
+  /* CHART */
+  .chart-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px; }
+  .chart-card-title { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  #weightChart { width: 100%; height: 160px; display: block; }
+
+  /* CONTROLS */
+  .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .month-nav { display: flex; align-items: center; gap: 6px; }
+  .nav-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.12s; font-family: inherit; }
+  .nav-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .month-label { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; min-width: 170px; text-align: center; }
+  .btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 14px; cursor: pointer; transition: all 0.12s; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-accent { border-color: var(--accent); color: var(--accent); }
+  .btn-accent:hover { background: var(--accent); color: var(--bg); }
+
+  /* CALENDAR */
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .day-header { text-align: center; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding: 6px 0 10px; }
+  .day-cell { background: var(--surface); border: 1px solid var(--border); min-height: 128px; padding: 8px; display: flex; flex-direction: column; gap: 5px; transition: border-color 0.12s; cursor: pointer; }
+  .day-cell:hover { border-color: var(--border2); }
+  .day-cell.empty { background: transparent; border-color: transparent; pointer-events: none; }
+  .day-cell.today { border-color: var(--accent); background: #0f120a; }
+  .day-cell.today .day-number { color: var(--accent); }
+  .day-number { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.05em; color: var(--muted2); line-height: 1; user-select: none; }
+  .cell-weight { font-size: 10px; color: var(--accent); letter-spacing: 0.06em; }
+  .badges-row { display: flex; flex-wrap: wrap; gap: 2px; }
+  .ex-badge { font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 4px; font-weight: 500; white-space: nowrap; }
+  .badge-vp { background: rgba(79,195,247,0.12); color: var(--c-vp); border: 1px solid rgba(79,195,247,0.25); }
+  .badge-vc { background: rgba(129,212,250,0.08); color: var(--c-vc); border: 1px solid rgba(129,212,250,0.18); }
+  .badge-hp { background: rgba(255,112,67,0.12); color: var(--c-hp); border: 1px solid rgba(255,112,67,0.25); }
+  .badge-hc { background: rgba(255,171,145,0.08); color: var(--c-hc); border: 1px solid rgba(255,171,145,0.18); }
+  .badge-leg { background: rgba(206,147,216,0.12); color: var(--c-leg); border: 1px solid rgba(206,147,216,0.25); }
+  .cell-notes { font-size: 9px; color: var(--muted); margin-top: auto; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  /* LEGEND */
+  .legend { margin-top: 22px; display: flex; gap: 18px; flex-wrap: wrap; padding-top: 18px; border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .legend-dot { width: 7px; height: 7px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); padding: 24px 26px; width: min(430px, 94vw); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.05em; color: var(--accent); }
+  .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; font-family: inherit; transition: color 0.12s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 16px; }
+  .modal-label:first-of-type { margin-top: 0; }
+  .modal-weight-row { display: flex; align-items: center; gap: 8px; }
+  .modal input[type=number] { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 8px 10px; width: 120px; outline: none; transition: border-color 0.12s; }
+  .modal input[type=number]:focus { border-color: var(--accent); }
+  .modal-workouts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .modal-workout-row { display: flex; align-items: center; gap: 6px; }
+  .modal select { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 7px 26px 7px 8px; flex: 1; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23555'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; transition: border-color 0.12s; border-radius: 0; }
+  .modal select:focus { border-color: var(--accent); }
+  .modal select option { background: #1a1a1a; }
+  .modal-rm-btn { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 4px; flex-shrink: 0; transition: color 0.12s; font-family: inherit; }
+  .modal-rm-btn:hover { color: #ff4545; }
+  .modal-add-btn { background: none; border: 1px dashed var(--border2); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; padding: 7px; cursor: pointer; transition: all 0.12s; text-align: center; width: 100%; }
+  .modal-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .modal textarea { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 8px 10px; width: 100%; outline: none; resize: vertical; min-height: 60px; line-height: 1.5; transition: border-color 0.12s; }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal textarea::placeholder { color: var(--muted2); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+  /* SKILLS */
+  .skills-intro { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 24px; line-height: 1.7; }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+  .skill-card { background: var(--surface); border: 1px solid var(--border); padding: 20px 22px; }
+  .skill-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.06em; margin-bottom: 14px; }
+  .skill-levels { display: flex; gap: 5px; margin-bottom: 10px; }
+  .level-btn { width: 34px; height: 34px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 16px; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; justify-content: center; }
+  .level-btn:hover { border-color: #555; color: var(--text); }
+  .level-btn.active { color: #0a0a0a; }
+  .skill-meta { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; font-style: italic; }
+  .skill-date { font-size: 9px; color: var(--muted2); letter-spacing: 0.1em; margin-top: 5px; text-transform: uppercase; }
+  .skill-history-card { background: var(--surface); border: 1px solid var(--border); padding: 18px 20px; margin-top: 22px; }
+  .skill-history-title { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  #skillHistoryChart { width: 100%; height: 200px; display: block; }
+  .skill-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+  .skill-legend-item { display: flex; align-items: center; gap: 6px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .skill-legend-dot { width: 8px; height: 3px; }
+
+  /* LEVEL REFERENCE TABLE */
+  .level-ref-card { background: var(--surface); border: 1px solid var(--border); padding: 18px 20px; margin-top: 16px; }
+  .level-ref-title { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .level-ref-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .level-ref-table th {
+    font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 400; text-align: left;
+    padding: 0 10px 10px 0; border-bottom: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  .level-ref-table th:first-child { width: 28px; text-align: center; padding-left: 0; }
+  .level-ref-table td {
+    padding: 7px 10px 7px 0; border-bottom: 1px solid #1a1a1a;
+    color: #aaa; vertical-align: top; line-height: 1.4;
+  }
+  .level-ref-table td:first-child {
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+    color: var(--accent); text-align: center; padding-left: 0;
+    vertical-align: middle;
+  }
+  .level-ref-table tr:last-child td { border-bottom: none; }
+  .level-ref-table tr:hover td { background: #151515; }
+
+  @media (max-width: 600px) {
+    .level-ref-card { padding: 14px 12px; overflow-x: auto; }
+    .level-ref-table { font-size: 9px; min-width: 480px; }
+    .level-ref-table th { font-size: 7px; padding-right: 8px; }
+    .level-ref-table td { padding: 6px 8px 6px 0; }
+    .level-ref-table td:first-child { font-size: 15px; }
+  }
+
+  /* ── SAFARI / WEBKIT FIXES ── */
+  input, select, textarea, button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  /* restore chevron on selects */
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23555'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  /* prevent iOS zoom on focus (font-size must be ≥16px on inputs) */
+  @media (max-width: 600px) {
+    input, select, textarea { font-size: 16px !important; }
+  }
+
+  /* ── MOBILE LAYOUT ── */
+  @media (max-width: 600px) {
+    .nav-tabs { padding: 0 10px; }
+    .nav-tab { padding: 14px 12px; font-size: 10px; letter-spacing: 0.1em; }
+    .page { padding: 12px 10px 80px; }
+    .page-title { font-size: 36px; margin-bottom: 16px; }
+
+    /* stats */
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 14px; }
+    .stat-value { font-size: 24px; }
+
+    /* controls */
+    .controls { margin-bottom: 12px; gap: 8px; }
+    .month-label { font-size: 17px; min-width: 140px; }
+    .nav-btn { width: 36px; height: 36px; font-size: 20px; }
+    .btn { font-size: 10px; padding: 8px 10px; }
+    #syncStatus { font-size: 9px; order: 3; width: 100%; margin-top: -4px; }
+
+    /* calendar — compact but tap-friendly */
+    .calendar-grid { gap: 2px; }
+    .day-header { font-size: 8px; letter-spacing: 0.1em; padding: 4px 0 8px; }
+    .day-cell {
+      min-height: 52px;
+      padding: 5px 4px;
+      gap: 3px;
+      /* make entire cell a large tap target */
+      -webkit-tap-highlight-color: rgba(200,255,0,0.08);
+    }
+    .day-number { font-size: 13px; }
+    /* show weight in small green text, hide badges/notes */
+    .cell-weight { font-size: 9px; letter-spacing: 0; }
+    .badges-row { display: flex; flex-wrap: wrap; gap: 1px; }
+    .ex-badge { font-size: 7px; padding: 1px 3px; }
+    .cell-notes { display: none; }
+
+    /* legend */
+    .legend { gap: 10px; margin-top: 14px; padding-top: 12px; }
+    .legend-item { font-size: 8px; }
+
+    /* chart */
+    .chart-card { padding: 12px 12px; }
+    #weightChart { height: 130px; }
+
+    /* skills page */
+    .skills-grid { grid-template-columns: 1fr; gap: 10px; }
+    .skill-card { padding: 14px 16px; }
+    .skill-name { font-size: 16px; margin-bottom: 10px; }
+    .level-btn { width: 38px; height: 38px; font-size: 15px; }
+    #skillHistoryChart { height: 160px; }
+
+    /* modal — full-screen sheet on iPhone */
+    .modal-overlay { align-items: flex-end; }
+    .modal {
+      width: 100%;
+      max-height: 92vh;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      padding: 20px 18px 36px;
+      /* safe area for notch/home bar */
+      padding-bottom: max(36px, env(safe-area-inset-bottom));
+      border-radius: 0;
+    }
+    .modal-title { font-size: 24px; }
+    /* larger touch targets for modal inputs */
+    .modal input[type=number] { font-size: 16px; padding: 10px 10px; width: 130px; }
+    .modal select { font-size: 16px; padding: 10px 32px 10px 10px; }
+    .modal textarea { font-size: 16px; padding: 10px; min-height: 70px; }
+    .modal-add-btn { padding: 10px; font-size: 12px; }
+    .modal-rm-btn { font-size: 22px; padding: 4px 8px; }
+    .modal-actions { gap: 10px; }
+    .modal-actions .btn { padding: 11px 20px; font-size: 11px; flex: 1; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('calendar', this)">Calendar</button>
+  <button class="nav-tab" onclick="showPage('skills', this)">Skills</button>
+</nav>
+
+<!-- CALENDAR PAGE -->
+<div class="page active" id="page-calendar">
+  <div class="page-title">Training Log</div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Workouts (month)</div>
+      <div class="stat-value" id="statWorkouts">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Current Weight</div>
+      <div class="stat-value" id="statCurrWeight">—</div>
+      <div class="stat-sub">kg</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="month-nav">
+      <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button class="nav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div id="syncStatus" style="font-size:10px;letter-spacing:0.1em;color:var(--muted);cursor:pointer" onclick="manualSync()" title="Click to sync now">○ Not connected</div>
+    <div style="display:flex;gap:6px;margin-left:auto">
+      <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
+      <button class="btn btn-accent" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" onclick="showSetupModal()" title="Cloud sync settings">⚙ Sync</button>
+    </div>
+    <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="handleImportCSV(event)">
+  </div>
+
+  <div class="calendar-grid" id="calGrid">
+    <div class="day-header">Sun</div>
+    <div class="day-header">Mon</div>
+    <div class="day-header">Tue</div>
+    <div class="day-header">Wed</div>
+    <div class="day-header">Thu</div>
+    <div class="day-header">Fri</div>
+    <div class="day-header">Sat</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands & Crows</div>
+  </div>
+
+  <div class="chart-card" style="margin-top:22px">
+    <div class="chart-card-title">Weekly Average Weight (kg)</div>
+    <canvas id="weightChart"></canvas>
+  </div>
+</div>
+
+<!-- SKILLS PAGE -->
+<div class="page" id="page-skills">
+  <div class="page-title">Skill Levels</div>
+  <div class="skills-intro">Rate your current level (1–7) for each skill. Changes are tracked over time.</div>
+  <div class="skills-grid" id="skillsGrid"></div>
+  <div class="skill-history-card">
+    <div class="skill-history-title">Skill Progression Over Time</div>
+    <canvas id="skillHistoryChart"></canvas>
+    <div class="skill-legend" id="skillLegend"></div>
+  </div>
+
+  <div class="level-ref-card">
+    <div class="level-ref-title">Level Reference Guide</div>
+    <div style="overflow-x:auto">
+    <table class="level-ref-table">
+      <thead>
+        <tr>
+          <th>Lvl</th>
+          <th>Planche Push</th>
+          <th>Front Lever</th>
+          <th>HSPU</th>
+          <th>Nordic Curl</th>
+          <th>1-Arm Chin</th>
+          <th>SL Squat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Zero weight</td><td>Zero weight</td><td>Zero weight</td><td>Zero weight</td><td>2-arm hang</td><td>2-leg squat</td></tr>
+        <tr><td>2</td><td>Shoulders ↔ rings</td><td>Shoulders ↔ rings</td><td>Pike</td><td>Zero weight</td><td>1-arm hang</td><td>Negative SLS</td></tr>
+        <tr><td>3</td><td>Tuck</td><td>Tuck</td><td>Feet elevated</td><td>Zero weight</td><td>2-arm partial</td><td>Positive SLS</td></tr>
+        <tr><td>4</td><td>Hips level with shoulders</td><td>Hips level with shoulders</td><td>Shoulder stand</td><td>No hands, partial ROM</td><td>2-arm full ROM</td><td>10kg SLS</td></tr>
+        <tr><td>5</td><td>Extended hips</td><td>Extended hips</td><td>Strap-assisted</td><td>No hands, negative</td><td>Partial neg OAC</td><td>20kg SLS</td></tr>
+        <tr><td>6</td><td>Advanced tuck (90°)</td><td>Advanced tuck (90°)</td><td>Unassisted</td><td>No hands, positive</td><td>Full ROM negative</td><td>30kg SLS</td></tr>
+        <tr><td>7</td><td>Full lay</td><td>Full lay</td><td>Side to side</td><td>Partial weighted</td><td>Partial positive</td><td>40kg SLS</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="maybeCloseModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-label">Body Weight</div>
+    <div class="modal-weight-row">
+      <input type="number" id="modalWeight" step="0.1" min="0" placeholder="0.0">
+      <span style="font-size:11px;color:var(--muted);letter-spacing:0.1em">kg</span>
+    </div>
+    <div class="modal-label">Workouts</div>
+    <div class="modal-workouts" id="modalWorkouts"></div>
+    <button class="modal-add-btn" onclick="modalAddWorkout('')">+ Add Workout</button>
+    <div class="modal-label">Notes</div>
+    <textarea id="modalNotes" placeholder="How did it feel? PRs, fatigue, anything worth noting..."></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  CLOUD SYNC — Firebase Realtime Database
+//  Free tier: 1GB storage, 10GB/month transfer — plenty.
+//  CORS enabled by default, works from file:// and Safari.
+//  Setup: create a free Firebase project (5 min, see ⚙ Sync).
+// ══════════════════════════════════════════════════════
+
+const LS_CONFIG  = 'tlog_config_v2';
+const LS_CAL     = 'tlog_cal_v4';
+const LS_SKILLS  = 'tlog_skills_v4';
+const LS_DIRTY   = 'tlog_dirty_v1';
+
+let cloudConfig  = null;   // { dbUrl, secret }
+let calData      = {};
+let skillData    = {};
+let syncStatus   = 'idle';
+
+// ── Config helpers ───────────────────────────────────
+function loadConfig() {
+  try { return JSON.parse(localStorage.getItem(LS_CONFIG)) || null; } catch { return null; }
+}
+function saveConfig(c) { localStorage.setItem(LS_CONFIG, JSON.stringify(c)); }
+
+// ── Local cache ──────────────────────────────────────
+function cacheLoad() {
+  try { calData   = JSON.parse(localStorage.getItem(LS_CAL))    || {}; } catch { calData = {}; }
+  try { skillData = JSON.parse(localStorage.getItem(LS_SKILLS)) || {}; } catch { skillData = {}; }
+}
+function cacheSave() {
+  localStorage.setItem(LS_CAL,    JSON.stringify(calData));
+  localStorage.setItem(LS_SKILLS, JSON.stringify(skillData));
+}
+
+// ── Sync status indicator ────────────────────────────
+function setSyncStatus(s, msg) {
+  syncStatus = s;
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const icons  = { idle:'○', syncing:'◌', ok:'●', error:'⚠', offline:'◌' };
+  const colors = { idle:'var(--muted)', syncing:'#888', ok:'var(--accent)', error:'#ff5555', offline:'#888' };
+  const labels = { idle:'Not connected', syncing:'Syncing…', ok:'Saved to cloud', error:'Sync error', offline:'Offline — saved locally' };
+  el.textContent = (icons[s]||'○') + ' ' + (msg || labels[s]);
+  el.style.color = colors[s] || 'var(--muted)';
+}
+
+// ── Firebase REST helpers ────────────────────────────
+// Firebase Realtime DB has a simple REST API:
+//   GET  {dbUrl}/traininglog.json?auth={secret}  → read
+//   PUT  {dbUrl}/traininglog.json?auth={secret}  → write
+
+function fbUrl() {
+  let base = cloudConfig.dbUrl.trim().replace(/\/$/, '');
+  return `${base}/traininglog.json?auth=${encodeURIComponent(cloudConfig.secret)}`;
+}
+
+async function cloudRead() {
+  if (!cloudConfig) return null;
+  setSyncStatus('syncing');
+  try {
+    const r = await fetch(fbUrl());
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    // Firebase returns null for empty nodes
+    return data || null;
+  } catch(e) {
+    setSyncStatus('error', 'Read failed');
+    return null;
+  }
+}
+
+async function cloudWrite(data) {
+  if (!cloudConfig) {
+    localStorage.setItem(LS_DIRTY, '1');
+    setSyncStatus('offline');
+    return false;
+  }
+  setSyncStatus('syncing');
+  try {
+    const r = await fetch(fbUrl(), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    localStorage.removeItem(LS_DIRTY);
+    setSyncStatus('ok');
+    return true;
+  } catch(e) {
+    localStorage.setItem(LS_DIRTY, '1');
+    setSyncStatus('error', 'Write failed — saved locally');
+    return false;
+  }
+}
+
+function buildPayload() {
+  return { cal: calData, skills: skillData, v: 4 };
+}
+
+async function pushToCloud() {
+  cacheSave();
+  await cloudWrite(buildPayload());
+}
+
+async function pullFromCloud() {
+  const remote = await cloudRead();
+  if (!remote) return false;
+  if (remote.cal)    calData   = remote.cal;
+  if (remote.skills) skillData = remote.skills;
+  cacheSave();
+  setSyncStatus('ok', 'Synced from cloud');
+  return true;
+}
+
+// ── Setup modal helpers ──────────────────────────────
+function maybeCloseSetup(e) {
+  if (e.target === document.getElementById('setupOverlay')) hideSetupModal();
+}
+
+function disconnectCloud() {
+  if (!confirm('Disconnect cloud sync? Your local data will be kept.')) return;
+  cloudConfig = null;
+  localStorage.removeItem(LS_CONFIG);
+  hideSetupModal();
+  setSyncStatus('idle', 'Disconnected');
+}
+
+function showSetupModal() {
+  if (cloudConfig) {
+    document.getElementById('setupDbUrl').value  = cloudConfig.dbUrl   || '';
+    document.getElementById('setupSecret').value = cloudConfig.secret  || '';
+  }
+  document.getElementById('setupOverlay').classList.add('open');
+}
+
+function hideSetupModal() {
+  document.getElementById('setupOverlay').classList.remove('open');
+}
+
+async function saveSetup() {
+  const dbUrl  = document.getElementById('setupDbUrl').value.trim();
+  const secret = document.getElementById('setupSecret').value.trim();
+  const errEl  = document.getElementById('setupError');
+  errEl.textContent = '';
+
+  if (!dbUrl || !secret) { errEl.textContent = 'Both fields are required.'; return; }
+  if (!dbUrl.includes('firebaseio.com')) {
+    errEl.textContent = 'Database URL should end in .firebaseio.com';
+    return;
+  }
+
+  const btn = document.getElementById('setupSaveBtn');
+  btn.textContent = 'Testing…';
+  btn.disabled = true;
+
+  // temporarily set config so fbUrl() works
+  cloudConfig = { dbUrl, secret };
+
+  try {
+    const r = await fetch(fbUrl());
+    if (r.status === 401 || r.status === 403) throw new Error('Permission denied — check your Database Secret.');
+    if (!r.ok) throw new Error(`Connection failed (HTTP ${r.status}).`);
+
+    saveConfig(cloudConfig);
+    hideSetupModal();
+    btn.textContent = 'Connect';
+    btn.disabled = false;
+
+    setSyncStatus('syncing');
+    const pulled = await pullFromCloud();
+    seedWeightData();
+    await pushToCloud();
+    renderCalendar();
+    setSyncStatus('ok', 'Connected!');
+  } catch(e) {
+    errEl.textContent = e.message || 'Connection failed.';
+    cloudConfig = loadConfig(); // revert
+    btn.textContent = 'Connect';
+    btn.disabled = false;
+  }
+}
+
+async function manualSync() {
+  if (!cloudConfig) { showSetupModal(); return; }
+  setSyncStatus('syncing');
+  const pulled = await pullFromCloud();
+  if (pulled) { renderCalendar(); setSyncStatus('ok', 'Synced'); }
+}
+
+// ══════════════════════════════
+//  CONFIG
+// ══════════════════════════════
+const EXERCISES = [
+  { v: '',    label: '— rest —',                                  badge: '',          cls: '' },
+  { v: 'vert', label: 'Vertical (HSPU / 1-arm chin)',             badge: 'Vertical',  cls: 'badge-vp' },
+  { v: 'horiz', label: 'Horizontal (planche push / lever rows)',  badge: 'Horizontal',cls: 'badge-hp' },
+  { v: 'leg', label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
+  { v: 'hscrow', label: 'Handstands & Crows',                    badge: 'HS & Crow', cls: 'badge-vc' },
+];
+const EX = {};
+EXERCISES.forEach(e => EX[e.v] = e);
+
+const SKILLS = [
+  { id: 'hspu',    name: 'Handstand Push',      color: '#4fc3f7' },
+  { id: 'oac',     name: 'One-Arm Chinup',       color: '#81d4fa' },
+  { id: 'planche', name: 'Planche Push',         color: '#ff7043' },
+  { id: 'lever',   name: 'Lever Rows',           color: '#ffab91' },
+  { id: 'slsq',    name: 'Weighted SL Squats',   color: '#ce93d8' },
+  { id: 'nordic',  name: 'Nordic Curls',         color: '#a5d6a7' },
+];
+
+// ══════════════════════════════
+//  HELPERS
+// ══════════════════════════════
+function dk(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function prettyDate(k) {
+  const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [y,m,d] = k.split('-');
+  return `${parseInt(d)} ${MO[parseInt(m)-1]} ${y}`;
+}
+
+function mondayOf(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const dow = d.getDay() || 7;
+  d.setDate(d.getDate() - dow + 1);
+  return d.toISOString().slice(0,10);
+}
+
+// ══════════════════════════════
+//  PAGE NAV
+// ══════════════════════════════
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'skills') renderSkillsPage();
+}
+
+// ══════════════════════════════
+//  CALENDAR
+// ══════════════════════════════
+let cy = new Date().getFullYear();
+let cm = new Date().getMonth();
+
+function changeMonth(dir) {
+  cm += dir;
+  if (cm > 11) { cm = 0; cy++; }
+  if (cm < 0)  { cm = 11; cy--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('monthLabel').textContent = `${MONTHS[cm]} ${cy}`;
+
+  const grid = document.getElementById('calGrid');
+  while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  const firstDow = new Date(cy, cm, 1).getDay();
+  const offset = firstDow;
+  const dim = new Date(cy, cm + 1, 0).getDate();
+  const today = new Date();
+
+  for (let i = 0; i < offset; i++) {
+    const e = document.createElement('div');
+    e.className = 'day-cell empty';
+    grid.appendChild(e);
+  }
+
+  for (let d = 1; d <= dim; d++) {
+    const k = dk(cy, cm, d);
+    const rec = calData[k] || {};
+    const isToday = today.getFullYear() === cy && today.getMonth() === cm && today.getDate() === d;
+
+    const cell = document.createElement('div');
+    cell.className = 'day-cell' + (isToday ? ' today' : '');
+
+    const dn = document.createElement('div');
+    dn.className = 'day-number';
+    dn.textContent = d;
+    cell.appendChild(dn);
+
+    if (rec.weight) {
+      const w = document.createElement('div');
+      w.className = 'cell-weight';
+      w.textContent = rec.weight + ' kg';
+      cell.appendChild(w);
+    }
+
+    const workouts = rec.workouts || [];
+    if (workouts.length) {
+      const br = document.createElement('div');
+      br.className = 'badges-row';
+      workouts.forEach(exv => {
+        const cfg = EX[exv];
+        if (cfg && cfg.badge) {
+          const b = document.createElement('span');
+          b.className = 'ex-badge ' + cfg.cls;
+          b.textContent = cfg.badge;
+          br.appendChild(b);
+        }
+      });
+      cell.appendChild(br);
+    }
+
+    if (rec.notes) {
+      const ns = document.createElement('div');
+      ns.className = 'cell-notes';
+      ns.textContent = rec.notes;
+      cell.appendChild(ns);
+    }
+
+    cell.addEventListener('click', () => openModal(k));
+    grid.appendChild(cell);
+  }
+
+  updateStats();
+  renderWeightChart();
+}
+
+// ══════════════════════════════
+//  STATS
+// ══════════════════════════════
+function updateStats() {
+  const prefix = `${cy}-${String(cm+1).padStart(2,'0')}`;
+  const keys = Object.keys(calData).filter(k => k.startsWith(prefix));
+  const totalW = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w).length), 0);
+  document.getElementById('statWorkouts').textContent = totalW;
+  const weights = keys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w));
+  document.getElementById('statCurrWeight').textContent = weights.length ? weights[weights.length-1].toFixed(1) : '—';
+}
+
+// ══════════════════════════════
+//  WEIGHT CHART
+// ══════════════════════════════
+function renderWeightChart() {
+  const canvas = document.getElementById('weightChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 600;
+  const H = 160;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const weekMap = {};
+  Object.keys(calData).sort().forEach(k => {
+    const w = parseFloat(calData[k].weight);
+    if (!isNaN(w) && w > 0) {
+      const mon = mondayOf(k);
+      if (!weekMap[mon]) weekMap[mon] = [];
+      weekMap[mon].push(w);
+    }
+  });
+
+  const weeks = Object.keys(weekMap).sort();
+  if (!weeks.length) {
+    ctx.fillStyle = '#2a2a2a';
+    ctx.font = "11px 'DM Mono',monospace";
+    ctx.textAlign = 'center';
+    ctx.fillText('No weight data yet — click any day to start logging', W/2, H/2);
+    return;
+  }
+
+  const avgs = weeks.map(w => weekMap[w].reduce((a,b)=>a+b,0)/weekMap[w].length);
+  const minV = Math.min(...avgs) - 0.8;
+  const maxV = Math.max(...avgs) + 0.8;
+  const range = maxV - minV || 1;
+  const pL=42, pR=14, pT=10, pB=26;
+  const cW = W-pL-pR, cH = H-pT-pB;
+  const xOf = i => pL + (weeks.length<2 ? cW/2 : (i/(weeks.length-1))*cW);
+  const yOf = v => pT + cH - ((v-minV)/range)*cH;
+
+  for (let g = 0; g <= 3; g++) {
+    const gv = minV + (range/3)*g, gy = yOf(gv);
+    ctx.strokeStyle = '#1d1d1d'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(W-pR, gy); ctx.stroke();
+    ctx.fillStyle = '#3a3a3a'; ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillText(gv.toFixed(1), pL-4, gy+3);
+  }
+
+  ctx.beginPath();
+  avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
+  ctx.lineTo(xOf(avgs.length-1), H-pB); ctx.lineTo(xOf(0), H-pB); ctx.closePath();
+  const g = ctx.createLinearGradient(0, pT, 0, H-pB);
+  g.addColorStop(0, 'rgba(200,255,0,0.16)'); g.addColorStop(1, 'rgba(200,255,0,0.01)');
+  ctx.fillStyle = g; ctx.fill();
+
+  ctx.beginPath(); ctx.strokeStyle = '#c8ff00'; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+  avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
+  ctx.stroke();
+
+  const labelStep = Math.max(1, Math.floor(weeks.length/7));
+  avgs.forEach((v,i) => {
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2);
+    ctx.fillStyle = '#c8ff00'; ctx.fill();
+    if (i % labelStep === 0 || i === weeks.length-1) {
+      const p = weeks[i].split('-');
+      ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${p[2]}/${p[1]}`, xOf(i), H-pB+12);
+    }
+  });
+}
+
+// ══════════════════════════════
+//  MODAL
+// ══════════════════════════════
+let modalKey = null;
+
+function openModal(k) {
+  modalKey = k;
+  const rec = calData[k] || {};
+  document.getElementById('modalTitle').textContent = prettyDate(k);
+  document.getElementById('modalWeight').value = rec.weight || '';
+  document.getElementById('modalNotes').value = rec.notes || '';
+  const mw = document.getElementById('modalWorkouts');
+  mw.innerHTML = '';
+  const ws = (rec.workouts && rec.workouts.length) ? rec.workouts : [''];
+  ws.forEach(v => modalAddWorkout(v));
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function modalAddWorkout(selVal) {
+  const mw = document.getElementById('modalWorkouts');
+  const row = document.createElement('div');
+  row.className = 'modal-workout-row';
+  const sel = document.createElement('select');
+  EXERCISES.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.v; o.textContent = e.label;
+    if (e.v === selVal) o.selected = true;
+    sel.appendChild(o);
+  });
+  const rm = document.createElement('button');
+  rm.className = 'modal-rm-btn'; rm.textContent = '×';
+  rm.onclick = () => { if (mw.children.length > 1) mw.removeChild(row); };
+  row.appendChild(sel); row.appendChild(rm); mw.appendChild(row);
+}
+
+async function saveModal() {
+  if (!modalKey) return;
+  const weight = document.getElementById('modalWeight').value;
+  const notes  = document.getElementById('modalNotes').value;
+  const workouts = Array.from(document.getElementById('modalWorkouts').querySelectorAll('select'))
+    .map(s => s.value).filter(v => v !== '');
+
+  if (weight || workouts.length || notes) {
+    calData[modalKey] = { weight, workouts, notes };
+  } else {
+    delete calData[modalKey];
+  }
+  closeModal();
+  renderCalendar();
+  await pushToCloud();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  modalKey = null;
+}
+function maybeCloseModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ══════════════════════════════
+//  SKILLS PAGE
+// ══════════════════════════════
+function renderSkillsPage() {
+  const grid = document.getElementById('skillsGrid');
+  grid.innerHTML = '';
+  SKILLS.forEach(sk => {
+    const rec = skillData[sk.id] || { level: 0, history: [] };
+    const card = document.createElement('div');
+    card.className = 'skill-card';
+    card.style.borderLeft = `3px solid ${sk.color}22`;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'skill-name'; nameEl.style.color = sk.color; nameEl.textContent = sk.name;
+    card.appendChild(nameEl);
+    const levelsEl = document.createElement('div');
+    levelsEl.className = 'skill-levels';
+    for (let l = 1; l <= 7; l++) {
+      const btn = document.createElement('button');
+      btn.className = 'level-btn' + (rec.level === l ? ' active' : '');
+      btn.textContent = l;
+      if (rec.level === l) { btn.style.background = sk.color; btn.style.borderColor = sk.color; }
+      btn.onclick = () => setSkillLevel(sk.id, l);
+      levelsEl.appendChild(btn);
+    }
+    card.appendChild(levelsEl);
+    const meta = document.createElement('div');
+    meta.className = 'skill-meta';
+    meta.textContent = rec.level ? `Level ${rec.level} of 7` : 'Not yet assessed';
+    card.appendChild(meta);
+    if (rec.history && rec.history.length) {
+      const last = rec.history[rec.history.length-1];
+      const dateEl = document.createElement('div');
+      dateEl.className = 'skill-date';
+      dateEl.textContent = `Updated ${prettyDate(last.date)}`;
+      card.appendChild(dateEl);
+    }
+    grid.appendChild(card);
+  });
+  renderSkillHistoryChart();
+  renderSkillLegend();
+}
+
+async function setSkillLevel(id, level) {
+  if (!skillData[id]) skillData[id] = { level: 0, history: [] };
+  const today = new Date().toISOString().slice(0,10);
+  skillData[id].level = level;
+  const hist = skillData[id].history;
+  if (!hist.length || hist[hist.length-1].date !== today) {
+    hist.push({ date: today, level });
+  } else {
+    hist[hist.length-1].level = level;
+  }
+  renderSkillsPage();
+  await pushToCloud();
+}
+
+function renderSkillLegend() {
+  const leg = document.getElementById('skillLegend');
+  leg.innerHTML = '';
+  SKILLS.forEach(sk => {
+    const item = document.createElement('div');
+    item.className = 'skill-legend-item';
+    item.innerHTML = `<div class="skill-legend-dot" style="background:${sk.color}"></div>${sk.name}`;
+    leg.appendChild(item);
+  });
+}
+
+function renderSkillHistoryChart() {
+  const canvas = document.getElementById('skillHistoryChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 600;
+  const H = 200;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, W, H);
+
+  const allDates = new Set();
+  SKILLS.forEach(sk => (skillData[sk.id]?.history||[]).forEach(h => allDates.add(h.date)));
+  const dates = Array.from(allDates).sort();
+
+  if (!dates.length) {
+    ctx.fillStyle = '#2a2a2a'; ctx.font = "11px 'DM Mono',monospace"; ctx.textAlign = 'center';
+    ctx.fillText('No skill history yet — set your first level above', W/2, H/2);
+    return;
+  }
+
+  const pL=24, pR=14, pT=10, pB=26, cW=W-pL-pR, cH=H-pT-pB;
+  const xOf = i => pL + (dates.length<2 ? cW/2 : (i/(dates.length-1))*cW);
+  const yOf = v => pT + cH - ((v-1)/6)*cH;
+
+  for (let l=1; l<=7; l++) {
+    const gy = yOf(l);
+    ctx.strokeStyle = '#191919'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL,gy); ctx.lineTo(W-pR,gy); ctx.stroke();
+    ctx.fillStyle = '#363636'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillText(l, pL-4, gy+3);
+  }
+
+  SKILLS.forEach(sk => {
+    const hist = skillData[sk.id]?.history || [];
+    if (!hist.length) return;
+    const pts = []; let last = null;
+    dates.forEach((d, i) => {
+      const entry = hist.find(h => h.date === d);
+      if (entry) last = entry.level;
+      if (last !== null) pts.push({ i, level: last });
+    });
+    if (!pts.length) return;
+    ctx.beginPath(); ctx.strokeStyle = sk.color; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+    pts.forEach((p,idx) => { if (idx===0) ctx.moveTo(xOf(p.i), yOf(p.level)); else ctx.lineTo(xOf(p.i), yOf(p.level)); });
+    ctx.stroke();
+    const lp = pts[pts.length-1];
+    ctx.beginPath(); ctx.arc(xOf(lp.i), yOf(lp.level), 3, 0, Math.PI*2);
+    ctx.fillStyle = sk.color; ctx.fill();
+  });
+
+  const step = Math.max(1, Math.floor(dates.length/6));
+  dates.forEach((d,i) => {
+    if (i % step === 0 || i === dates.length-1) {
+      const p = d.split('-');
+      ctx.fillStyle = '#383838'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${p[2]}/${p[1]}`, xOf(i), H-pB+12);
+    }
+  });
+}
+
+// ══════════════════════════════
+//  EXPORT / IMPORT CSV
+// ══════════════════════════════
+function exportCSV() {
+  const rows = [['Date','Weight (kg)','Workouts','Notes']];
+  Object.keys(calData).sort().forEach(k => {
+    const v = calData[k];
+    if (v.weight || (v.workouts||[]).length || v.notes) {
+      const exList = (v.workouts||[]).map(ex => EX[ex]?.label||ex).join(' | ');
+      rows.push([k, v.weight||'', exList, (v.notes||'').replace(/\n/g,' ')]);
+    }
+  });
+  const csv = rows.map(r => r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = `training-log-${cy}-${String(cm+1).padStart(2,'0')}.csv`;
+  a.click();
+}
+
+function triggerImportCSV() {
+  document.getElementById('csvImportInput').click();
+}
+
+function handleImportCSV(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    let imported = 0, skipped = 0;
+    lines.slice(1).forEach(line => {
+      // parse quoted CSV
+      const cols = [];
+      let cur = '', inQ = false;
+      for (let i=0; i<line.length; i++) {
+        const c = line[i];
+        if (c==='"') { inQ = !inQ; }
+        else if (c===',' && !inQ) { cols.push(cur); cur=''; }
+        else cur += c;
+      }
+      cols.push(cur);
+      const [date, weight, , notes] = cols;
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) { skipped++; return; }
+      const k = date.trim();
+      if (!calData[k]) calData[k] = { weight: '', workouts: [], notes: '' };
+      if (weight?.trim()) calData[k].weight = weight.trim();
+      if (notes?.trim())  calData[k].notes  = notes.trim();
+      imported++;
+    });
+    evt.target.value = '';
+    renderCalendar();
+    await pushToCloud();
+    alert(`Imported ${imported} rows${skipped ? `, skipped ${skipped} invalid` : ''}.`);
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════
+//  SEED HISTORICAL WEIGHT DATA
+// ══════════════════════════════
+const SEED_WEIGHTS = {
+  "2022-01-22":64.0,"2022-01-29":64.0,
+  "2024-03-11":62.1,"2024-03-18":62.0,"2024-03-25":62.7,
+  "2024-04-01":62.7,"2024-04-08":64.2,"2024-04-15":63.8,
+  "2024-05-06":65.3,"2024-05-13":64.7,"2024-05-20":64.7,"2024-05-27":64.6,
+  "2024-06-03":64.8,"2024-06-10":64.4,"2024-06-17":64.2,"2024-06-24":63.8,
+  "2024-07-01":63.5,"2024-07-08":63.7,"2024-07-15":64.3,"2024-07-22":64.1,"2024-07-29":64.2,
+  "2024-08-19":64.1,"2024-08-26":64.2,
+  "2024-09-02":63.9,"2024-09-09":64.6,"2024-09-16":64.6,"2024-09-23":64.7,"2024-09-30":64.7,
+  "2024-10-07":64.4,"2024-10-14":64.4,"2024-10-21":65.0,"2024-10-28":65.3,
+  "2024-11-04":65.7,"2024-11-11":65.7,"2024-11-18":65.4,"2024-11-25":65.4,
+  "2024-12-02":65.6,"2024-12-09":65.6,"2024-12-23":65.8,"2024-12-30":65.5,
+  "2025-01-06":65.8,"2025-01-13":65.7,"2025-01-20":65.8,"2025-01-27":65.9,
+  "2025-02-03":65.9,"2025-02-10":66.3,"2025-02-17":66.0,"2025-02-24":67.0,
+  "2025-03-03":65.7,"2025-03-10":65.7,"2025-03-17":65.8,"2025-03-24":66.4,"2025-03-31":66.2,
+  "2025-04-07":66.7,"2025-04-14":66.7,"2025-04-21":67.0,"2025-04-28":66.9,
+  "2025-05-05":66.9,"2025-05-12":66.8,"2025-05-19":66.4,"2025-05-26":67.4,
+  "2025-06-02":67.7,"2025-06-09":67.8,"2025-06-16":68.1,"2025-06-23":68.1,"2025-06-30":68.1,
+  "2025-07-07":68.2,"2025-07-14":68.2,"2025-07-21":68.0,"2025-07-28":67.8,
+  "2025-08-04":67.8,"2025-08-11":67.8,"2025-08-18":68.0,"2025-08-25":68.2,
+  "2025-09-01":67.8,"2025-09-08":68.1,"2025-09-15":68.2,"2025-09-22":67.6,"2025-09-29":67.6,
+  "2025-10-06":67.8,"2025-10-13":67.8,"2025-10-20":67.8,"2025-10-27":67.5,
+  "2025-11-03":68.1,"2025-11-10":67.8,"2025-11-17":68.2,"2025-11-24":68.7,
+  "2025-12-01":68.7,"2025-12-08":68.8,"2025-12-15":68.8,"2025-12-22":69.2,"2025-12-29":69.3,
+  "2026-01-05":69.0,"2026-01-12":69.0,"2026-01-19":68.7,"2026-01-26":68.7,
+  "2026-02-02":68.4,"2026-02-09":68.5,"2026-02-16":68.5,"2026-02-23":67.8,
+  "2026-03-02":67.8,"2026-03-09":66.5,"2026-03-16":66.1,"2026-03-23":66.2
+};
+
+function seedWeightData() {
+  let changed = false;
+  Object.entries(SEED_WEIGHTS).forEach(([date, w]) => {
+    if (w === null) return;
+    if (!calData[date]) { calData[date] = { weight: String(w), workouts: [], notes: '' }; changed = true; }
+    else if (!calData[date].weight) { calData[date].weight = String(w); changed = true; }
+  });
+  return changed;
+}
+
+// ══════════════════════════════
+//  INIT
+// ══════════════════════════════
+document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
+window.addEventListener('resize', () => {
+  renderWeightChart();
+  if (document.getElementById('page-skills').classList.contains('active')) renderSkillHistoryChart();
+});
+
+async function init() {
+  cloudConfig = loadConfig();
+  cacheLoad();
+
+  if (cloudConfig) {
+    // try to pull fresh data from cloud
+    setSyncStatus('syncing');
+    const pulled = await pullFromCloud();
+    if (pulled) {
+      seedWeightData();
+      // if seed added new data, push back
+      const changed = seedWeightData(); // idempotent second call returns false after first
+      if (localStorage.getItem(LS_DIRTY)) await pushToCloud();
+    } else {
+      // offline or error — use local cache
+      seedWeightData();
+      cacheSave();
+      setSyncStatus('offline', 'Using cached data');
+    }
+  } else {
+    // no cloud configured yet — run on local cache only
+    seedWeightData();
+    cacheSave();
+    setSyncStatus('idle', 'Not connected to cloud');
+  }
+
+  renderCalendar();
+}
+
+init();
+</script>
+<!-- SETUP / CLOUD SYNC MODAL -->
+<div class="modal-overlay" id="setupOverlay" onclick="maybeCloseSetup(event)">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Cloud Sync Setup</div>
+      <button class="modal-close" onclick="hideSetupModal()">✕</button>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:18px">
+      Uses <strong style="color:var(--text)">Firebase Realtime Database</strong> — free, works on all devices including iPhone. Takes about 5 minutes to set up once.
+    </div>
+
+    <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Setup Steps</div>
+    <ol style="font-size:11px;color:#888;line-height:2.1;padding-left:18px;margin-bottom:20px">
+      <li>Go to <strong style="color:var(--text)">console.firebase.google.com</strong> and sign in with Google</li>
+      <li>Click <strong style="color:var(--text)">Add project</strong> → give it any name → Continue through the steps</li>
+      <li>In the left sidebar, click <strong style="color:var(--text)">Build → Realtime Database</strong></li>
+      <li>Click <strong style="color:var(--text)">Create Database</strong> → choose any location → select <strong style="color:var(--text)">"Start in test mode"</strong> → Enable</li>
+      <li>Copy the URL shown at the top of the database panel — it looks like:<br>
+        <code style="color:var(--accent);font-size:10px">https://your-project-default-rtdb.firebaseio.com</code>
+      </li>
+      <li>In the left sidebar go to <strong style="color:var(--text)">Project Settings</strong> (gear icon) → <strong style="color:var(--text)">Service accounts</strong> → <strong style="color:var(--text)">Database secrets</strong> → click <strong style="color:var(--text)">Show</strong> and copy the secret</li>
+      <li>Paste both below and click Connect</li>
+    </ol>
+
+    <div class="modal-label" style="margin-top:0">Database URL</div>
+    <input type="text" id="setupDbUrl" placeholder="https://your-project-default-rtdb.firebaseio.com"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 10px;width:100%;outline:none;margin-bottom:12px;border-radius:0">
+
+    <div class="modal-label">Database Secret</div>
+    <input type="password" id="setupSecret" placeholder="your-database-secret"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 10px;width:100%;outline:none;margin-bottom:8px;border-radius:0">
+
+    <div id="setupError" style="font-size:11px;color:#ff5555;min-height:16px;margin-bottom:12px"></div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn" onclick="hideSetupModal()">Cancel</button>
+      <button class="btn" style="color:#ff5555;border-color:#ff555533" onclick="disconnectCloud()">Disconnect</button>
+      <button class="btn btn-accent" id="setupSaveBtn" onclick="saveSetup()">Connect</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
