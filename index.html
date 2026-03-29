@@ -23,72 +23,6 @@
     --c-hc: #ffab91;
     --c-leg: #ce93d8;
   }
-  body.light {
-    --bg: #f4f4f0;
-    --surface: #ffffff;
-    --surface2: #efefeb;
-    --surface3: #e8e8e4;
-    --border: #ddddd8;
-    --border2: #ccccC6;
-    --accent: #5a8a00;
-    --text: #1a1a1a;
-    --muted: #888;
-    --muted2: #bbb;
-  }
-  body.light .day-cell.today { background: #f0f8e0; }
-  body.light .chart-card-title, body.light .stat-label { color: var(--muted); }
-  body.light .mscard-bar-fill.workouts-fill { background: linear-gradient(90deg,#4a9a4a,#5a8a00); }
-  body.light .badge-vp { background: rgba(79,195,247,0.15); }
-  body.light .badge-hp { background: rgba(255,112,67,0.15); }
-  body.light .badge-vc { background: rgba(129,212,250,0.12); }
-  body.light .badge-leg { background: rgba(206,147,216,0.15); }
-
-  /* FOOTER TOOLBAR */
-  .page-footer {
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  .footer-group {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .footer-label {
-    font-size: 8px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-right: 2px;
-  }
-  .mode-toggle {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    border: 1px solid var(--border2);
-    padding: 6px 12px;
-    transition: all 0.15s;
-    user-select: none;
-    background: transparent;
-  }
-  .mode-toggle:hover { border-color: var(--accent); color: var(--accent); }
-  .mode-toggle-icon { font-size: 13px; line-height: 1; }
-
-  @media (max-width: 600px) {
-    .page-footer { gap: 6px; }
-    .footer-group { gap: 5px; }
-    .footer-label { display: none; }
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; }
   button, a, [onclick] { touch-action: manipulation; }
@@ -144,7 +78,6 @@
   .badge-hp { background: rgba(255,112,67,0.12); color: var(--c-hp); border: 1px solid rgba(255,112,67,0.25); }
   .badge-hc { background: rgba(255,171,145,0.08); color: var(--c-hc); border: 1px solid rgba(255,171,145,0.18); }
   .badge-leg { background: rgba(206,147,216,0.12); color: var(--c-leg); border: 1px solid rgba(206,147,216,0.25); }
-  .badge-cycle { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
   .cell-notes { font-size: 9px; color: var(--muted); margin-top: auto; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
   /* LEGEND */
@@ -269,54 +202,6 @@
     .overview-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
   }
 
-  /* ── PASSWORD GATE ── */
-  #pwOverlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-  }
-  #pwOverlay.hidden { display: none; }
-  .pw-box {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    padding: 36px 40px;
-    width: min(360px, 90vw);
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .pw-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px; letter-spacing: 0.06em;
-    color: var(--accent); line-height: 1;
-  }
-  .pw-sub {
-    font-size: 10px; color: var(--muted);
-    letter-spacing: 0.1em; text-transform: uppercase;
-  }
-  .pw-input {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 16px; padding: 10px 12px;
-    width: 100%; outline: none;
-    border-radius: 0;
-    transition: border-color 0.15s;
-  }
-  .pw-input:focus { border-color: var(--accent); }
-  .pw-error {
-    font-size: 10px; color: #ff5555;
-    letter-spacing: 0.08em; min-height: 14px;
-  }
-  .pw-btn {
-    background: var(--accent); border: none;
-    color: #0a0a0a; font-family: 'DM Mono', monospace;
-    font-size: 11px; letter-spacing: 0.12em;
-    text-transform: uppercase; padding: 12px;
-    cursor: pointer; transition: opacity 0.15s;
-    border-radius: 0;
-  }
-  .pw-btn:hover { opacity: 0.85; }
-
   /* ── SAFARI / WEBKIT FIXES ── */
   input, select, textarea, button {
     -webkit-appearance: none;
@@ -412,19 +297,6 @@
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
-<div id="pwOverlay">
-  <div class="pw-box">
-    <div class="pw-title">Training Log</div>
-    <div class="pw-sub">Enter password to continue</div>
-    <input class="pw-input" type="password" id="pwInput"
-      placeholder="Password"
-      onkeydown="if(event.key==='Enter') checkPassword()">
-    <div class="pw-error" id="pwError"></div>
-    <button class="pw-btn" onclick="checkPassword()">Unlock</button>
-  </div>
-</div>
-
 <nav class="nav-tabs">
   <button class="nav-tab active" onclick="showPage('calendar', this)">Calendar</button>
   <button class="nav-tab" onclick="showPage('overview', this)">Overview</button>
@@ -445,13 +317,6 @@
       <div class="stat-value" id="statCurrWeight">—</div>
       <div class="stat-sub">kg</div>
     </div>
-    <div class="stat-card" onclick="logCycleToday()" title="Log a cycle commute for today"
-      style="cursor:pointer;transition:border-color 0.15s"
-      onmouseover="this.style.borderColor='#fbbf24'" onmouseout="this.style.borderColor=''">
-      <div class="stat-label" style="color:#fbbf24">🚲 Cycles (month)</div>
-      <div class="stat-value" id="statCycles" style="color:#fbbf24">0</div>
-      <div class="stat-sub" style="color:#fbbf24;opacity:0.7">tap to log today</div>
-    </div>
   </div>
 
   <div class="controls">
@@ -461,9 +326,13 @@
       <button class="nav-btn" onclick="changeMonth(1)">›</button>
       <button class="btn" id="todayBtn" onclick="goToToday()" style="display:none;font-size:9px;padding:5px 10px;letter-spacing:0.1em">Today</button>
     </div>
-    <div id="syncStatus" style="font-size:10px;letter-spacing:0.1em;color:var(--muted);cursor:pointer;margin-left:auto" onclick="manualSync()" title="Click to sync now">○ Not connected</div>
+    <div id="syncStatus" style="font-size:10px;letter-spacing:0.1em;color:var(--muted);cursor:pointer" onclick="manualSync()" title="Click to sync now">○ Not connected</div>
+    <div style="display:flex;gap:6px;margin-left:auto">
+      <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
+      <button class="btn btn-accent" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" onclick="showSetupModal()" title="Cloud sync settings">⚙ Sync</button>
+    </div>
     <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="handleImportCSV(event)">
-    <input type="file" id="jsonImportInput" accept=".json" style="display:none" onchange="handleImportJSON(event)">
   </div>
 
   <div id="calSwipeZone">
@@ -488,27 +357,6 @@
   <div class="chart-card" style="margin-top:22px">
     <div class="chart-card-title">Weekly Average Weight (kg)</div>
     <canvas id="weightChart"></canvas>
-  </div>
-
-  <div class="page-footer">
-    <div class="footer-group">
-      <span class="footer-label">Export</span>
-      <button class="btn btn-accent" onclick="exportCSV()">CSV</button>
-      <button class="btn btn-accent" onclick="exportJSON()">JSON</button>
-    </div>
-    <div class="footer-group">
-      <span class="footer-label">Import</span>
-      <button class="btn" onclick="triggerImportCSV()">CSV</button>
-      <button class="btn" onclick="triggerImportJSON()">JSON</button>
-    </div>
-    <div class="footer-group">
-      <span class="footer-label">Sync</span>
-      <button class="btn" onclick="showSetupModal()">⚙ Cloud Sync</button>
-    </div>
-    <button class="mode-toggle" onclick="toggleMode()" id="modeToggle" style="margin-left:auto">
-      <span class="mode-toggle-icon" id="modeIcon">☀</span>
-      <span id="modeLabel">Day</span>
-    </button>
   </div>
 </div>
 
@@ -757,12 +605,11 @@ async function manualSync() {
 //  CONFIG
 // ══════════════════════════════
 const EXERCISES = [
-  { v: '',       label: '— rest —',                                  badge: '',          cls: '' },
-  { v: 'vert',   label: 'Vertical (HSPU / 1-arm chin)',              badge: 'Vertical',  cls: 'badge-vp' },
-  { v: 'horiz',  label: 'Horizontal (planche push / lever rows)',    badge: 'Horizontal',cls: 'badge-hp' },
-  { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
-  { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow', cls: 'badge-vc' },
-  { v: 'cycle',  label: 'Cycle Commute',                             badge: '🚲',         cls: 'badge-cycle' },
+  { v: '',    label: '— rest —',                                  badge: '',          cls: '' },
+  { v: 'vert', label: 'Vertical (HSPU / 1-arm chin)',             badge: 'Vertical',  cls: 'badge-vp' },
+  { v: 'horiz', label: 'Horizontal (planche push / lever rows)',  badge: 'Horizontal',cls: 'badge-hp' },
+  { v: 'leg', label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
+  { v: 'hscrow', label: 'Handstands & Crows',                    badge: 'HS & Crow', cls: 'badge-vc' },
 ];
 const EX = {};
 EXERCISES.forEach(e => EX[e.v] = e);
@@ -854,8 +701,7 @@ function renderOverview() {
       if (thisMonthBest > prevBest && thisMonthBest > 0) milestones.push(`${sk.name} → L${thisMonthBest}`);
     });
 
-    const cycleCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w === 'cycle').length), 0);
-    monthData.push({ avgWeight, workoutCount, cycleCount, milestones });
+    monthData.push({ avgWeight, workoutCount, milestones });
   }
 
   // ── Normalise across the year (past months only) ──
@@ -1096,11 +942,10 @@ function renderCalendar() {
     }
 
     if (rec.notes) {
-      const ni = document.createElement('div');
-      ni.title = rec.notes;
-      ni.style.cssText = 'margin-top:auto;display:flex;align-items:center;gap:3px;padding-top:2px';
-      ni.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:#81d4fa;flex-shrink:0;display:inline-block;opacity:0.8"></span><span style="font-size:8px;color:#81d4fa;opacity:0.7;letter-spacing:0.04em;line-height:1">note</span>';
-      cell.appendChild(ni);
+      const ns = document.createElement('div');
+      ns.className = 'cell-notes';
+      ns.textContent = rec.notes;
+      cell.appendChild(ns);
     }
 
     cell.addEventListener('click', () => openModal(k));
@@ -1118,25 +963,10 @@ function renderCalendar() {
 function updateStats() {
   const prefix = `${cy}-${String(cm+1).padStart(2,'0')}`;
   const keys = Object.keys(calData).filter(k => k.startsWith(prefix));
-  // workouts excludes cycles from the count
-  const totalW = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w && w !== 'cycle').length), 0);
+  const totalW = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w).length), 0);
   document.getElementById('statWorkouts').textContent = totalW;
   const weights = keys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w));
   document.getElementById('statCurrWeight').textContent = weights.length ? weights[weights.length-1].toFixed(1) : '—';
-  const totalCycles = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w === 'cycle').length), 0);
-  document.getElementById('statCycles').textContent = totalCycles;
-}
-
-async function logCycleToday() {
-  const now = new Date();
-  // only log for current real date, regardless of which month is displayed
-  const k = dk(now.getFullYear(), now.getMonth(), now.getDate());
-  if (!calData[k]) calData[k] = { weight: '', workouts: [], notes: '' };
-  if (!calData[k].workouts) calData[k].workouts = [];
-  // add a cycle entry for today
-  calData[k].workouts.push('cycle');
-  renderCalendar();
-  await pushToCloud();
 }
 
 // ══════════════════════════════
@@ -1260,30 +1090,8 @@ function renderWeightChart() {
 }
 
 // ══════════════════════════════
-//  DAY / NIGHT MODE
+//  TODAY BUTTON
 // ══════════════════════════════
-function toggleMode() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('tlog_mode', isLight ? 'light' : 'dark');
-  updateModeToggle(isLight);
-  renderWeightChart(); // redraw chart — colours differ in light mode
-}
-
-function updateModeToggle(isLight) {
-  const icon  = document.getElementById('modeIcon');
-  const label = document.getElementById('modeLabel');
-  if (!icon) return;
-  icon.textContent  = isLight ? '🌙' : '☀';
-  label.textContent = isLight ? 'Night' : 'Day';
-}
-
-function applyStoredMode() {
-  const stored = localStorage.getItem('tlog_mode');
-  if (stored === 'light') {
-    document.body.classList.add('light');
-    updateModeToggle(true);
-  }
-}
 function goToToday() {
   const now = new Date();
   cy = now.getFullYear();
@@ -1636,79 +1444,6 @@ function handleImportCSV(evt) {
 }
 
 // ══════════════════════════════
-//  JSON BACKUP EXPORT / IMPORT
-// ══════════════════════════════
-function exportJSON() {
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    version: 4,
-    cal: calData,
-    skills: skillData
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  const dateStr = new Date().toISOString().slice(0, 10);
-  a.href = URL.createObjectURL(blob);
-  a.download = `training-log-backup-${dateStr}.json`;
-  a.click();
-}
-
-function triggerImportJSON() {
-  document.getElementById('jsonImportInput').click();
-}
-
-function handleImportJSON(evt) {
-  const file = evt.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const payload = JSON.parse(e.target.result);
-      if (!payload.cal && !payload.skills) {
-        alert('This does not look like a valid training log backup file.');
-        return;
-      }
-      const confirmed = confirm(
-        'This will merge the backup into your current data. ' +
-        'Existing entries will be overwritten where dates match. Continue?'
-      );
-      if (!confirmed) return;
-
-      if (payload.cal) {
-        Object.assign(calData, payload.cal);
-      }
-      if (payload.skills) {
-        // Merge skill history — keep highest level entries, union all history
-        Object.keys(payload.skills).forEach(id => {
-          if (!skillData[id]) {
-            skillData[id] = payload.skills[id];
-          } else {
-            const existingDates = new Set((skillData[id].history||[]).map(h => h.date));
-            (payload.skills[id].history||[]).forEach(h => {
-              if (!existingDates.has(h.date)) skillData[id].history.push(h);
-            });
-            skillData[id].history.sort((a,b) => a.date.localeCompare(b.date));
-            // use highest current level
-            const backupLevel = payload.skills[id].level || 0;
-            if (backupLevel > (skillData[id].level || 0)) {
-              skillData[id].level = backupLevel;
-            }
-          }
-        });
-      }
-
-      evt.target.value = '';
-      renderCalendar();
-      await pushToCloud();
-      alert('Backup restored successfully.');
-    } catch(err) {
-      alert('Could not read backup file. Make sure it is a valid JSON backup.');
-    }
-  };
-  reader.readAsText(file);
-}
-
-// ══════════════════════════════
 //  SEED HISTORICAL WEIGHT DATA
 // ══════════════════════════════
 const SEED_WEIGHTS = {
@@ -1751,51 +1486,8 @@ function seedWeightData() {
 }
 
 // ══════════════════════════════
-//  PASSWORD GATE
-// ══════════════════════════════
-const PW_HASH    = 'a47b76456fdb34f1b6c7804102c02ff6cbb91396ab8fa30baeea14e8ff147580';
-const PW_LS_KEY  = 'tlog_auth_v1';
-
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function checkPassword() {
-  const val = document.getElementById('pwInput').value;
-  const hash = await sha256(val);
-  if (hash === PW_HASH) {
-    localStorage.setItem(PW_LS_KEY, PW_HASH);
-    document.getElementById('pwOverlay').classList.add('hidden');
-    init();
-  } else {
-    const err = document.getElementById('pwError');
-    err.textContent = 'Incorrect password.';
-    document.getElementById('pwInput').value = '';
-    setTimeout(() => { err.textContent = ''; }, 2500);
-  }
-}
-
-async function checkAuth() {
-  const stored = localStorage.getItem(PW_LS_KEY);
-  if (stored === PW_HASH) {
-    document.getElementById('pwOverlay').classList.add('hidden');
-    return true;
-  }
-  // show overlay, focus input — init() will be called after successful entry
-  setTimeout(() => document.getElementById('pwInput')?.focus(), 100);
-  return false;
-}
-
-// ══════════════════════════════
 //  INIT
 // ══════════════════════════════
-// Default credentials — embedded so every new version auto-connects.
-const DEFAULT_CONFIG = {
-  dbUrl:  'https://training-log-2-default-rtdb.firebaseio.com',
-  secret: 'aGZiwWT1uOb6k3cBuqVQjHaWv22pg8Xs9o2PTYsx'
-};
-
 document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
 window.addEventListener('resize', () => {
   renderWeightChart();
@@ -1803,29 +1495,35 @@ window.addEventListener('resize', () => {
 });
 
 async function init() {
-  applyStoredMode();
-  // Use stored config if present, otherwise fall back to embedded defaults
-  cloudConfig = loadConfig() || DEFAULT_CONFIG;
+  cloudConfig = loadConfig();
   cacheLoad();
 
-  // try to pull fresh data from cloud
-  setSyncStatus('syncing');
-  const pulled = await pullFromCloud();
-  if (pulled) {
-    seedWeightData();
-    if (localStorage.getItem(LS_DIRTY)) await pushToCloud();
+  if (cloudConfig) {
+    // try to pull fresh data from cloud
+    setSyncStatus('syncing');
+    const pulled = await pullFromCloud();
+    if (pulled) {
+      seedWeightData();
+      // if seed added new data, push back
+      const changed = seedWeightData(); // idempotent second call returns false after first
+      if (localStorage.getItem(LS_DIRTY)) await pushToCloud();
+    } else {
+      // offline or error — use local cache
+      seedWeightData();
+      cacheSave();
+      setSyncStatus('offline', 'Using cached data');
+    }
   } else {
-    // offline or error — use local cache
+    // no cloud configured yet — run on local cache only
     seedWeightData();
     cacheSave();
-    setSyncStatus('offline', 'Using cached data');
+    setSyncStatus('idle', 'Not connected to cloud');
   }
 
   renderCalendar();
 }
 
-// Bootstrap — check password first, then init if already authenticated
-checkAuth().then(authed => { if (authed) init(); });
+init();
 </script>
 <!-- SETUP / CLOUD SYNC MODAL -->
 <div class="modal-overlay" id="setupOverlay" onclick="maybeCloseSetup(event)">
