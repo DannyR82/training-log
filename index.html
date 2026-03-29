@@ -22,6 +22,7 @@
     --c-hp: #ff7043;
     --c-hc: #ffab91;
     --c-leg: #ce93d8;
+    --c-nordic: #a78bca;
   }
   body.light {
     --bg: #f4f4f0;
@@ -136,7 +137,7 @@
   .day-cell.today { border-color: var(--accent); background: #0f120a; }
   .day-cell.today .day-number { color: var(--accent); }
   .day-number { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.05em; color: var(--muted2); line-height: 1; user-select: none; }
-  .cell-weight { font-size: 10px; color: var(--accent); letter-spacing: 0.06em; }
+  .cell-weight { font-size: 10px; color: #a8c832; letter-spacing: 0.06em; }
   .badges-row { display: flex; flex-wrap: wrap; gap: 2px; }
   .ex-badge { font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 4px; font-weight: 500; white-space: nowrap; }
   .badge-vp { background: rgba(79,195,247,0.12); color: var(--c-vp); border: 1px solid rgba(79,195,247,0.25); }
@@ -364,8 +365,11 @@
       -webkit-tap-highlight-color: rgba(200,255,0,0.08);
     }
     .day-number { font-size: 13px; }
-    /* show weight in small green text, hide badges/notes */
+    /* show weight without kg unit on mobile */
     .cell-weight { font-size: 9px; letter-spacing: 0; }
+    .cell-weight[data-weight]::before { content: attr(data-weight); }
+    .cell-weight[data-weight] { font-size: 0; } /* hide original text */
+    .cell-weight[data-weight]::before { font-size: 9px; }
     .badges-row { display: flex; flex-wrap: wrap; gap: 1px; }
     .ex-badge { font-size: 7px; padding: 1px 3px; }
     .cell-notes { display: none; }
@@ -436,11 +440,15 @@
   <div class="page-title">Training Log</div>
 
   <div class="stats-row">
-    <div class="stat-card">
+    <div class="stat-card" onclick="logWorkoutToday()" title="Log a workout for today"
+      style="cursor:pointer;transition:border-color 0.15s"
+      onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
       <div class="stat-label">Workouts (month)</div>
       <div class="stat-value" id="statWorkouts">0</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" onclick="logWeightToday()" title="Log today's weight"
+      style="cursor:pointer;transition:border-color 0.15s"
+      onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
       <div class="stat-label">Current Weight</div>
       <div class="stat-value" id="statCurrWeight">—</div>
       <div class="stat-sub">kg</div>
@@ -448,9 +456,8 @@
     <div class="stat-card" onclick="logCycleToday()" title="Log a cycle commute for today"
       style="cursor:pointer;transition:border-color 0.15s"
       onmouseover="this.style.borderColor='#fbbf24'" onmouseout="this.style.borderColor=''">
-      <div class="stat-label" style="color:#fbbf24">🚲 Cycles (month)</div>
+      <div class="stat-label" style="color:#fbbf24">Cycles (month)</div>
       <div class="stat-value" id="statCycles" style="color:#fbbf24">0</div>
-      <div class="stat-sub" style="color:#fbbf24;opacity:0.7">tap to log today</div>
     </div>
   </div>
 
@@ -483,11 +490,6 @@
     <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands & Crows</div>
-  </div>
-
-  <div class="chart-card" style="margin-top:22px">
-    <div class="chart-card-title">Weekly Average Weight (kg)</div>
-    <canvas id="weightChart"></canvas>
   </div>
 
   <div class="page-footer">
@@ -547,16 +549,22 @@
       <div class="modal-title" id="modalTitle"></div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
+    <div id="modalWeightSection">
     <div class="modal-label">Body Weight</div>
     <div class="modal-weight-row">
       <input type="number" id="modalWeight" step="0.1" min="0" placeholder="0.0">
       <span style="font-size:11px;color:var(--muted);letter-spacing:0.1em">kg</span>
     </div>
+    </div>
+    <div id="modalWorkoutsSection">
     <div class="modal-label">Workouts</div>
     <div class="modal-workouts" id="modalWorkouts"></div>
     <button class="modal-add-btn" onclick="modalAddWorkout('')">+ Add Workout</button>
+    </div>
+    <div id="modalNotesSection">
     <div class="modal-label">Notes</div>
     <textarea id="modalNotes" placeholder="How did it feel? PRs, fatigue, anything worth noting..."></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn btn-accent" onclick="saveModal()">Save</button>
@@ -762,7 +770,7 @@ const EXERCISES = [
   { v: 'horiz',  label: 'Horizontal (planche push / lever rows)',    badge: 'Horizontal',cls: 'badge-hp' },
   { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
   { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow', cls: 'badge-vc' },
-  { v: 'cycle',  label: 'Cycle Commute',                             badge: '🚲',         cls: 'badge-cycle' },
+  { v: 'cycle',  label: 'Cycle Commute',                             badge: 'C',          cls: 'badge-cycle' },
 ];
 const EX = {};
 EXERCISES.forEach(e => EX[e.v] = e);
@@ -773,7 +781,7 @@ const SKILLS = [
   { id: 'planche', name: 'Planche Push',    color: '#ff7043', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
   { id: 'lever',   name: 'Lever Rows',      color: '#ffab91', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
   { id: 'slsq',    name: 'Pistol Squats',   color: '#ce93d8', levels: ['2-leg squat','Negative SLS','Positive SLS','10kg SLS','20kg SLS','30kg SLS','40kg SLS'] },
-  { id: 'nordic',  name: 'Nordic Curls',    color: '#a5d6a7', levels: ['Zero weight','Zero weight','Zero weight','No hands, partial ROM','No hands, negative','No hands, positive','Partial weighted'] },
+  { id: 'nordic',  name: 'Nordic Curls',    color: '#a78bca', levels: ['Zero weight','Zero weight','Zero weight','No hands, partial ROM','No hands, negative','No hands, positive','Partial weighted'] },
 ];
 
 // ══════════════════════════════
@@ -860,7 +868,7 @@ function renderOverview() {
 
   // ── Normalise across the year (past months only) ──
   const pastAvgWeights   = monthData.map(d => d.avgWeight).filter(v => v !== null);
-  const pastWorkouts     = monthData.map(d => d.workoutCount).filter(v => v > 0);
+  const pastWorkouts = monthData.map(d => d.workoutCount).filter(v => v > 0);
 
   // Weight: use a narrow band (minW-0.5 to maxW+0.5) so variation is visible
   const minW = pastAvgWeights.length ? Math.min(...pastAvgWeights) : 0;
@@ -871,8 +879,8 @@ function renderOverview() {
 
   // ── Second pass: render cards ──
   for (let m = 0; m < 12; m++) {
-    const { avgWeight, workoutCount, milestones } = monthData[m];
-    const isEmpty   = !avgWeight && workoutCount === 0 && milestones.length === 0;
+    const { avgWeight, workoutCount, cycleCount, milestones } = monthData[m];
+    const isEmpty   = !avgWeight && workoutCount === 0 && cycleCount === 0 && milestones.length === 0;
     const isCurrent = overviewYear === today.getFullYear() && m === today.getMonth();
     const isFuture  = new Date(overviewYear, m, 1) > today;
 
@@ -929,6 +937,14 @@ function renderOverview() {
         ? `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`
         : 'No workouts logged';
       card.appendChild(woEl);
+
+      // Cycle count
+      if (cycleCount > 0) {
+        const cyEl = document.createElement('div');
+        cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:1px';
+        cyEl.textContent = `🚲 ${cycleCount} commute${cycleCount !== 1 ? 's' : ''}`;
+        card.appendChild(cyEl);
+      }
 
       // Skills dots + milestone star on same row
       const skillsRow = document.createElement('div');
@@ -1026,6 +1042,18 @@ function renderOverview() {
       <div style="width:32px;height:5px;background:linear-gradient(90deg,#1a3a5c,#ff7043)"></div>
       Weight (${minW.toFixed(1)} → ${maxW.toFixed(1)} kg)
     </div>`;
+
+  // ── Weight chart ──
+  let chartCard = document.getElementById('overviewWeightChart');
+  if (!chartCard) {
+    chartCard = document.createElement('div');
+    chartCard.id = 'overviewWeightChart';
+    chartCard.className = 'chart-card';
+    chartCard.style.marginTop = '22px';
+    chartCard.innerHTML = '<div class="chart-card-title">Weekly Average Weight (kg)</div><canvas id="weightChart"></canvas>';
+    document.getElementById('page-overview').appendChild(chartCard);
+  }
+  renderWeightChart();
 }
 
 // ══════════════════════════════
@@ -1075,6 +1103,7 @@ function renderCalendar() {
     if (rec.weight) {
       const w = document.createElement('div');
       w.className = 'cell-weight';
+      w.dataset.weight = rec.weight;
       w.textContent = rec.weight + ' kg';
       cell.appendChild(w);
     }
@@ -1109,7 +1138,6 @@ function renderCalendar() {
 
   updateStats();
   updateTodayBtn();
-  renderWeightChart();
 }
 
 // ══════════════════════════════
@@ -1129,14 +1157,26 @@ function updateStats() {
 
 async function logCycleToday() {
   const now = new Date();
-  // only log for current real date, regardless of which month is displayed
   const k = dk(now.getFullYear(), now.getMonth(), now.getDate());
   if (!calData[k]) calData[k] = { weight: '', workouts: [], notes: '' };
   if (!calData[k].workouts) calData[k].workouts = [];
-  // add a cycle entry for today
   calData[k].workouts.push('cycle');
   renderCalendar();
   await pushToCloud();
+}
+
+function logWorkoutToday() {
+  const now = new Date();
+  const k = dk(now.getFullYear(), now.getMonth(), now.getDate());
+  cy = now.getFullYear(); cm = now.getMonth();
+  openModal(k, 'workout');
+}
+
+function logWeightToday() {
+  const now = new Date();
+  const k = dk(now.getFullYear(), now.getMonth(), now.getDate());
+  cy = now.getFullYear(); cm = now.getMonth();
+  openModal(k, 'weight');
 }
 
 // ══════════════════════════════
@@ -1266,7 +1306,7 @@ function toggleMode() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('tlog_mode', isLight ? 'light' : 'dark');
   updateModeToggle(isLight);
-  renderWeightChart(); // redraw chart — colours differ in light mode
+  if (document.getElementById('weightChart')) renderWeightChart();
 }
 
 function updateModeToggle(isLight) {
@@ -1332,7 +1372,8 @@ function updateTodayBtn() {
 // ══════════════════════════════
 let modalKey = null;
 
-function openModal(k) {
+function openModal(k, mode) {
+  // mode: undefined = full, 'workout' = workouts only, 'weight' = weight only
   modalKey = k;
   const rec = calData[k] || {};
   document.getElementById('modalTitle').textContent = prettyDate(k);
@@ -1342,6 +1383,16 @@ function openModal(k) {
   mw.innerHTML = '';
   const ws = (rec.workouts && rec.workouts.length) ? rec.workouts : [''];
   ws.forEach(v => modalAddWorkout(v));
+
+  // Show/hide sections based on mode
+  const showWeight   = !mode || mode === 'weight';
+  const showWorkouts = !mode || mode === 'workout';
+  const showNotes    = !mode;
+
+  document.getElementById('modalWeightSection').style.display   = showWeight   ? '' : 'none';
+  document.getElementById('modalWorkoutsSection').style.display = showWorkouts ? '' : 'none';
+  document.getElementById('modalNotesSection').style.display    = showNotes    ? '' : 'none';
+
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -1798,7 +1849,7 @@ const DEFAULT_CONFIG = {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
 window.addEventListener('resize', () => {
-  renderWeightChart();
+  if (document.getElementById('weightChart')) renderWeightChart();
   if (document.getElementById('page-skills').classList.contains('active')) renderSkillHistoryChart();
 });
 
