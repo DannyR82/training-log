@@ -246,7 +246,7 @@
   .mscard-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.07em; color: var(--text); line-height: 1; }
   .mscard-weight { font-size: 20px; font-family: 'Bebas Neue', sans-serif; color: var(--accent); letter-spacing: 0.04em; line-height: 1.1; }
   .mscard-weight-label { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-  .mscard-workouts { font-size: 10px; color: #888; letter-spacing: 0.06em; margin-top: 2px; }
+  .mscard-workouts { font-size: 10px; color: var(--accent); font-weight: 600; letter-spacing: 0.04em; margin-top: 2px; }
   .mscard-milestone { font-size: 9px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; border-top: 1px solid #1e1e1e; padding-top: 5px; }
   .mscard-arrow { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; padding-top: 6px; transition: color 0.12s; }
   .month-summary-card:hover .mscard-arrow { color: var(--accent); }
@@ -354,7 +354,7 @@
     .month-label { font-size: 15px; min-width: 110px; }
     .nav-btn { width: 32px; height: 32px; font-size: 18px; }
     .btn { font-size: 10px; padding: 8px 10px; }
-    #syncStatus { font-size: 8px; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+    #syncStatus { font-size: 7px; letter-spacing: 0.04em; white-space: nowrap; flex-shrink: 1; min-width: 0; }
 
     /* calendar — compact but tap-friendly */
     .calendar-grid { gap: 2px; }
@@ -487,11 +487,11 @@
   </div>
   </div>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands & Crows</div>
+  <div class="legend" style="flex-direction:column;gap:6px">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical: HSPU &amp; 1-Arm Chinup</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
   </div>
 
   <div class="page-footer">
@@ -499,20 +499,17 @@
       <span class="footer-label">Export</span>
       <button class="btn" onclick="exportCSV()">Export CSV</button>
       <button class="btn" onclick="exportJSON()">Export JSON</button>
+      <button class="btn" onclick="showSetupModal()">⚙ Sync</button>
     </div>
     <div class="footer-group">
       <span class="footer-label">Import</span>
       <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
       <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
+      <button class="mode-toggle" onclick="toggleMode()" id="modeToggle">
+        <span class="mode-toggle-icon" id="modeIcon">☀︎</span>
+        <span id="modeLabel">Day</span>
+      </button>
     </div>
-    <div class="footer-group">
-      <span class="footer-label">Sync</span>
-      <button class="btn" onclick="showSetupModal()">⚙ Cloud Sync</button>
-    </div>
-    <button class="mode-toggle" onclick="toggleMode()" id="modeToggle" style="margin-left:auto">
-      <span class="mode-toggle-icon" id="modeIcon">☀</span>
-      <span id="modeLabel">Day</span>
-    </button>
   </div>
 </div>
 
@@ -769,7 +766,7 @@ async function manualSync() {
 const EXERCISES = [
   { v: '',       label: '— rest —',                                  badge: '',          cls: '' },
   { v: 'vert',   label: 'Vertical (HSPU / 1-arm chin)',              badge: 'Vertical',  cls: 'badge-vp' },
-  { v: 'horiz',  label: 'Horizontal (planche push / lever rows)',    badge: 'Horizontal',cls: 'badge-hp' },
+  { v: 'horiz',  label: 'Horizontal (planche push / front lever)',    badge: 'Horizontal',cls: 'badge-hp' },
   { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
   { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow', cls: 'badge-vc' },
   { v: 'cycle',  label: 'Cycle Commute',                             badge: 'C',          cls: 'badge-cycle' },
@@ -781,7 +778,7 @@ const SKILLS = [
   { id: 'hspu',    name: 'Handstand Push',  color: '#4fc3f7', levels: ['Zero weight','Pike','Feet elevated','Shoulder stand','Strap-assisted','Unassisted','Side to side'] },
   { id: 'oac',     name: 'One-Arm Chinup',  color: '#81d4fa', levels: ['2-arm hang','1-arm hang','2-arm partial','2-arm full ROM','Partial neg OAC','Full ROM negative','Partial positive'] },
   { id: 'planche', name: 'Planche Push',    color: '#ff7043', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
-  { id: 'lever',   name: 'Lever Rows',      color: '#ffab91', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
+  { id: 'lever',   name: 'Front Lever',     color: '#ffab91', levels: ['Zero weight','Shoulders ↔ rings','Tuck','Hips level with shoulders','Extended hips','Advanced tuck (90°)','Full lay'] },
   { id: 'slsq',    name: 'Pistol Squats',   color: '#ce93d8', levels: ['2-leg squat','Negative SLS','Positive SLS','10kg SLS','20kg SLS','30kg SLS','40kg SLS'] },
   { id: 'nordic',  name: 'Nordic Curls',    color: '#a78bca', levels: ['Zero weight','Zero weight','Zero weight','No hands, partial ROM','No hands, negative','No hands, positive','Partial weighted'] },
 ];
@@ -935,9 +932,13 @@ function renderOverview() {
       // Workout count
       const woEl = document.createElement('div');
       woEl.className = 'mscard-workouts';
-      woEl.textContent = workoutCount
-        ? `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`
-        : 'No workouts logged';
+      if (workoutCount) {
+        woEl.textContent = `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`;
+      } else {
+        woEl.textContent = 'No workouts logged';
+        woEl.style.fontWeight = '400';
+        woEl.style.color = 'var(--accent)';
+      }
       card.appendChild(woEl);
 
       // Cycle count
@@ -1315,7 +1316,7 @@ function updateModeToggle(isLight) {
   const icon  = document.getElementById('modeIcon');
   const label = document.getElementById('modeLabel');
   if (!icon) return;
-  icon.textContent  = isLight ? '🌙' : '☀';
+  icon.textContent  = isLight ? '🌙' : '☀︎';
   label.textContent = isLight ? 'Night' : 'Day';
 }
 
