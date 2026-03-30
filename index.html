@@ -204,11 +204,11 @@
   .level-ref-table { width: 100%; border-collapse: collapse; font-size: 10px; }
   .level-ref-table th {
     font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted); font-weight: 400; text-align: left;
+    color: var(--accent); font-weight: 400; text-align: left;
     padding: 0 10px 10px 0; border-bottom: 1px solid var(--border2);
     white-space: nowrap;
   }
-  .level-ref-table th:first-child { width: 28px; text-align: center; padding-left: 0; }
+  .level-ref-table th:first-child { width: 28px; text-align: center; padding-left: 0; color: var(--muted); }
   .level-ref-table td {
     padding: 7px 10px 7px 0; border-bottom: 1px solid #1a1a1a;
     color: #aaa; vertical-align: top; line-height: 1.4;
@@ -344,8 +344,10 @@
     .page-title { font-size: 36px; margin-bottom: 16px; }
 
     /* stats */
-    .stats-row { grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 14px; }
-    .stat-value { font-size: 24px; }
+    .stats-row { grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 14px; }
+    .stat-value { font-size: 20px; }
+    .stat-label { font-size: 8px; letter-spacing: 0.08em; }
+    .stat-card { padding: 10px 8px; }
 
     /* controls */
     .controls { margin-bottom: 12px; gap: 8px; }
