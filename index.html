@@ -350,11 +350,11 @@
     .stat-card { padding: 10px 8px; }
 
     /* controls */
-    .controls { margin-bottom: 12px; gap: 8px; }
-    .month-label { font-size: 17px; min-width: 140px; }
-    .nav-btn { width: 36px; height: 36px; font-size: 20px; }
+    .controls { margin-bottom: 12px; gap: 6px; flex-wrap: nowrap; }
+    .month-label { font-size: 15px; min-width: 110px; }
+    .nav-btn { width: 32px; height: 32px; font-size: 18px; }
     .btn { font-size: 10px; padding: 8px 10px; }
-    #syncStatus { font-size: 9px; order: 3; width: 100%; margin-top: -4px; }
+    #syncStatus { font-size: 8px; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
 
     /* calendar — compact but tap-friendly */
     .calendar-grid { gap: 2px; }
@@ -497,13 +497,13 @@
   <div class="page-footer">
     <div class="footer-group">
       <span class="footer-label">Export</span>
-      <button class="btn btn-accent" onclick="exportCSV()">CSV</button>
-      <button class="btn btn-accent" onclick="exportJSON()">JSON</button>
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" onclick="exportJSON()">Export JSON</button>
     </div>
     <div class="footer-group">
       <span class="footer-label">Import</span>
-      <button class="btn" onclick="triggerImportCSV()">CSV</button>
-      <button class="btn" onclick="triggerImportJSON()">JSON</button>
+      <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
+      <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
     </div>
     <div class="footer-group">
       <span class="footer-label">Sync</span>
@@ -1342,16 +1342,45 @@ function updateTodayBtn() {
 }
 
 // ══════════════════════════════
-//  SWIPE TO CHANGE MONTH
+//  SWIPE GESTURES
 // ══════════════════════════════
 (function initSwipe() {
-  let touchStartX = 0, touchStartY = 0;
+  let touchStartX = 0, touchStartY = 0, touchStartTarget = null;
   const SWIPE_THRESHOLD = 50;
-  const ANGLE_THRESHOLD = 35; // degrees — ignore diagonal swipes
+  const ANGLE_THRESHOLD = 35;
+
+  // Tab order for tab-swipe navigation
+  const TAB_IDS = ['calendar', 'overview', 'skills'];
+
+  function getActiveTab() {
+    const active = document.querySelector('.nav-tab.active');
+    if (!active) return -1;
+    const tabs = Array.from(document.querySelectorAll('.nav-tab'));
+    return tabs.indexOf(active);
+  }
+
+  function switchTab(dir) {
+    const tabs = Array.from(document.querySelectorAll('.nav-tab'));
+    const cur = getActiveTab();
+    const next = cur + dir;
+    if (next < 0 || next >= tabs.length) return;
+    tabs[next].click();
+  }
+
+  function isInsideCalGrid(el) {
+    const grid = document.getElementById('calSwipeZone');
+    return grid && grid.contains(el);
+  }
+
+  function isInsideLevelRef(el) {
+    const ref = document.getElementById('levelRefTableWrap');
+    return ref && ref.contains(el);
+  }
 
   function onTouchStart(e) {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
+    touchStartTarget = e.target;
   }
 
   function onTouchEnd(e) {
@@ -1360,9 +1389,29 @@ function updateTodayBtn() {
     const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
     const isHorizontal = angle < ANGLE_THRESHOLD || angle > (180 - ANGLE_THRESHOLD);
     if (!isHorizontal || Math.abs(dx) < SWIPE_THRESHOLD) return;
-    // only fire when calendar page is active
-    if (!document.getElementById('page-calendar').classList.contains('active')) return;
-    changeMonth(dx < 0 ? 1 : -1);
+
+    const calActive = document.getElementById('page-calendar').classList.contains('active');
+    const skillsActive = document.getElementById('page-skills').classList.contains('active');
+
+    // Calendar tab: swipe on the grid = change month; swipe elsewhere = change tab
+    if (calActive) {
+      if (isInsideCalGrid(touchStartTarget)) {
+        changeMonth(dx < 0 ? 1 : -1);
+      } else {
+        switchTab(dx < 0 ? 1 : -1);
+      }
+      return;
+    }
+
+    // Skills tab: swipe on level ref table = do nothing (horizontal scroll); elsewhere = change tab
+    if (skillsActive) {
+      if (isInsideLevelRef(touchStartTarget)) return;
+      switchTab(dx < 0 ? 1 : -1);
+      return;
+    }
+
+    // All other tabs: always change tab
+    switchTab(dx < 0 ? 1 : -1);
   }
 
   document.addEventListener('touchstart', onTouchStart, { passive: true });
