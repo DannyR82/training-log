@@ -158,6 +158,69 @@
   .legend-item { display: flex; align-items: center; gap: 7px; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   .legend-dot { width: 7px; height: 7px; }
 
+  /* CALENDAR SIDEBAR LAYOUT */
+  .cal-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    align-items: flex-start;
+  }
+  .cal-main {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+  /* Narrow: sidebar flows below calendar as normal block */
+  .cal-sidebar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .cal-sidebar .legend {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .cal-sidebar-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Wide screen: sidebar floats to the right of the calendar */
+  @media (min-width: 1000px) {
+    .cal-layout { flex-wrap: nowrap; gap: 22px; }
+    .cal-main { width: auto; }
+    .cal-sidebar {
+      width: 170px;
+      flex-shrink: 0;
+      padding-top: 2px; /* align with top of calendar grid */
+    }
+    .cal-sidebar .legend {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+    .cal-sidebar-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .cal-sidebar-footer .footer-group {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+    .cal-sidebar-footer .footer-label {
+      display: block;
+    }
+  }
+
   /* MODAL */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 100; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
@@ -480,40 +543,44 @@
     <input type="file" id="jsonImportInput" accept=".json" style="display:none" onchange="handleImportJSON(event)">
   </div>
 
-  <div id="calSwipeZone">
-  <div class="calendar-grid" id="calGrid">
-    <div class="day-header">Sun</div>
-    <div class="day-header">Mon</div>
-    <div class="day-header">Tue</div>
-    <div class="day-header">Wed</div>
-    <div class="day-header">Thu</div>
-    <div class="day-header">Fri</div>
-    <div class="day-header">Sat</div>
-  </div>
-  </div>
-
-  <div class="legend" style="flex-direction:column;gap:6px">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical: HSPU &amp; 1-Arm Chinup</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
-  </div>
-
-  <div class="page-footer">
-    <div class="footer-group">
-      <span class="footer-label">Export</span>
-      <button class="btn" onclick="exportCSV()">Export CSV</button>
-      <button class="btn" onclick="exportJSON()">Export JSON</button>
-      <button class="btn" onclick="showSetupModal()">⚙ Sync</button>
+  <div class="cal-layout">
+    <div id="calSwipeZone" class="cal-main">
+      <div class="calendar-grid" id="calGrid">
+        <div class="day-header">Sun</div>
+        <div class="day-header">Mon</div>
+        <div class="day-header">Tue</div>
+        <div class="day-header">Wed</div>
+        <div class="day-header">Thu</div>
+        <div class="day-header">Fri</div>
+        <div class="day-header">Sat</div>
+      </div>
     </div>
-    <div class="footer-group">
-      <span class="footer-label">Import</span>
-      <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
-      <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
-      <button class="mode-toggle" onclick="toggleMode()" id="modeToggle">
-        <span class="mode-toggle-icon" id="modeIcon">☀︎</span>
-        <span id="modeLabel">Day</span>
-      </button>
+
+    <div class="cal-sidebar">
+      <div class="legend" style="flex-direction:column;gap:6px;margin-top:0;padding-top:0;border-top:none">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical: HSPU &amp; 1-Arm Chinup</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
+      </div>
+
+      <div class="page-footer cal-sidebar-footer">
+        <div class="footer-group">
+          <span class="footer-label">Export</span>
+          <button class="btn" onclick="exportCSV()">Export CSV</button>
+          <button class="btn" onclick="exportJSON()">Export JSON</button>
+          <button class="btn" onclick="showSetupModal()">⚙ Sync</button>
+        </div>
+        <div class="footer-group">
+          <span class="footer-label">Import</span>
+          <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
+          <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
+          <button class="mode-toggle" onclick="toggleMode()" id="modeToggle">
+            <span class="mode-toggle-icon" id="modeIcon">☀︎</span>
+            <span id="modeLabel">Day</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
