@@ -140,6 +140,11 @@
   .cell-weight { font-size: 10px; color: #a8c832; letter-spacing: 0.06em; }
   .badges-row { display: flex; flex-wrap: wrap; gap: 2px; }
   .ex-badge { font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 4px; font-weight: 500; white-space: nowrap; }
+  /* mobile: hide the text node, show short label via ::before */
+  @media (max-width: 600px) {
+    .ex-badge { font-size: 0; padding: 1px 3px; }
+    .ex-badge::before { content: attr(data-short); font-size: 7px; letter-spacing: 0.04em; font-weight: 500; }
+  }
   .badge-vp { background: rgba(79,195,247,0.12); color: var(--c-vp); border: 1px solid rgba(79,195,247,0.25); }
   .badge-vc { background: rgba(129,212,250,0.08); color: var(--c-vc); border: 1px solid rgba(129,212,250,0.18); }
   .badge-hp { background: rgba(255,112,67,0.12); color: var(--c-hp); border: 1px solid rgba(255,112,67,0.25); }
@@ -373,7 +378,7 @@
     .cell-weight[data-weight] { font-size: 0; } /* hide original text */
     .cell-weight[data-weight]::before { font-size: 9px; }
     .badges-row { display: flex; flex-wrap: wrap; gap: 1px; }
-    .ex-badge { font-size: 7px; padding: 1px 3px; }
+
     .cell-notes { display: none; }
 
     /* legend */
@@ -764,12 +769,12 @@ async function manualSync() {
 //  CONFIG
 // ══════════════════════════════
 const EXERCISES = [
-  { v: '',       label: '— rest —',                                  badge: '',          cls: '' },
-  { v: 'vert',   label: 'Vertical (HSPU / 1-arm chin)',              badge: 'Vertical',  cls: 'badge-vp' },
-  { v: 'horiz',  label: 'Horizontal (planche push / front lever)',    badge: 'Horizontal',cls: 'badge-hp' },
-  { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',      cls: 'badge-leg' },
-  { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow', cls: 'badge-vc' },
-  { v: 'cycle',  label: 'Cycle Commute',                             badge: 'C',          cls: 'badge-cycle' },
+  { v: '',       label: '— rest —',                                  badge: '',           short: '',     cls: '' },
+  { v: 'vert',   label: 'Vertical (HSPU / 1-arm chin)',              badge: 'Vertical',   short: 'Vrtcl',  cls: 'badge-vp' },
+  { v: 'horiz',  label: 'Horizontal (planche push / front lever)',   badge: 'Horizontal', short: 'Hrztl',  cls: 'badge-hp' },
+  { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',       short: 'Legs', cls: 'badge-leg' },
+  { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow',  short: 'HS',   cls: 'badge-vc' },
+  { v: 'cycle',  label: 'Cycle Commute',                             badge: 'C',          short: 'C',    cls: 'badge-cycle' },
 ];
 const EX = {};
 EXERCISES.forEach(e => EX[e.v] = e);
@@ -1120,6 +1125,8 @@ function renderCalendar() {
         if (cfg && cfg.badge) {
           const b = document.createElement('span');
           b.className = 'ex-badge ' + cfg.cls;
+          b.dataset.full = cfg.badge;
+          b.dataset.short = cfg.short || cfg.badge;
           b.textContent = cfg.badge;
           br.appendChild(b);
         }
