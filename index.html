@@ -171,8 +171,10 @@
   }
 
   /* Narrow-only block: visible below 1200px, hidden on wide */
+  .cal-sidebar { display: none !important; }
   .cal-narrow-below { display: block; }
   @media (min-width: 1200px) {
+    .cal-sidebar { display: flex !important; }
     .cal-narrow-below { display: none; }
   }
 
@@ -189,7 +191,6 @@
       min-width: 0;
     }
     .cal-sidebar {
-      display: flex;
       flex-direction: column;
       gap: 18px;
       width: 240px;
