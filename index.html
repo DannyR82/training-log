@@ -159,59 +159,62 @@
   .legend-dot { width: 7px; height: 7px; }
 
   /* CALENDAR SIDEBAR LAYOUT */
+  /* Narrow: sidebar hidden, calendar full width */
   .cal-layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    align-items: flex-start;
+    display: block;
   }
   .cal-main {
-    flex: 1;
-    min-width: 0;
     width: 100%;
   }
-  /* Narrow: sidebar flows below calendar as normal block */
   .cal-sidebar {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  .cal-sidebar .legend {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .cal-sidebar-footer {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+    display: none;
   }
 
-  /* Wide screen: sidebar floats to the right of the calendar */
-  @media (min-width: 1000px) {
-    .cal-layout { flex-wrap: nowrap; gap: 22px; }
-    .cal-main { width: auto; }
+  /* Narrow-only block: visible below 1200px, hidden on wide */
+  .cal-narrow-below { display: block; }
+  @media (min-width: 1200px) {
+    .cal-narrow-below { display: none; }
+  }
+
+  /* Wide screen (≥1200px): sidebar to the right of calendar */
+  @media (min-width: 1200px) {
+    .cal-layout {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 28px;
+      align-items: flex-start;
+    }
+    .cal-main {
+      flex: 1;
+      min-width: 0;
+    }
     .cal-sidebar {
-      width: 170px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 240px;
       flex-shrink: 0;
-      padding-top: 2px; /* align with top of calendar grid */
+      padding-top: 2px;
     }
     .cal-sidebar .legend {
-      margin-top: 0;
-      padding-top: 0;
-      border-top: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cal-sidebar .legend-item {
+      white-space: nowrap;
+      font-size: 10px;
     }
     .cal-sidebar-footer {
+      display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 6px;
+      padding-top: 14px;
       border-top: 1px solid var(--border);
     }
     .cal-sidebar-footer .footer-group {
+      display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 5px;
@@ -580,6 +583,33 @@
             <span id="modeLabel">Day</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shown only on narrow screens (hidden at ≥1200px via CSS) -->
+  <div class="cal-narrow-below">
+    <div class="legend" style="flex-direction:column;gap:6px">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-vp)"></div>Vertical: HSPU &amp; 1-Arm Chinup</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
+    </div>
+    <div class="page-footer">
+      <div class="footer-group">
+        <span class="footer-label">Export</span>
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+        <button class="btn" onclick="exportJSON()">Export JSON</button>
+        <button class="btn" onclick="showSetupModal()">⚙ Sync</button>
+      </div>
+      <div class="footer-group">
+        <span class="footer-label">Import</span>
+        <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
+        <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
+        <button class="mode-toggle" onclick="toggleMode()" id="modeToggleNarrow">
+          <span class="mode-toggle-icon" id="modeIconNarrow">☀︎</span>
+          <span id="modeLabelNarrow">Day</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1387,11 +1417,12 @@ function toggleMode() {
 }
 
 function updateModeToggle(isLight) {
-  const icon  = document.getElementById('modeIcon');
-  const label = document.getElementById('modeLabel');
-  if (!icon) return;
-  icon.textContent  = isLight ? '🌙' : '☀︎';
-  label.textContent = isLight ? 'Night' : 'Day';
+  [['modeIcon','modeLabel'],['modeIconNarrow','modeLabelNarrow']].forEach(([iId,lId]) => {
+    const icon  = document.getElementById(iId);
+    const label = document.getElementById(lId);
+    if (icon)  icon.textContent  = isLight ? '🌙' : '☀︎';
+    if (label) label.textContent = isLight ? 'Night' : 'Day';
+  });
 }
 
 function applyStoredMode() {
