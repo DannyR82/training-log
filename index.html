@@ -115,7 +115,18 @@
   /* CHART */
   .chart-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px; }
   .chart-card-title { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  #weightChart { width: 100%; height: 160px; display: block; }
+  #weightChart { display: block; height: 120px; }
+  #weightChartNarrow { display: block; height: 140px; }
+
+  /* Milestone star in calendar cell */
+  .milestone-star {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 11px;
+    color: var(--accent);
+    line-height: 1;
+  }
 
   /* CONTROLS */
   .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -131,7 +142,7 @@
   /* CALENDAR */
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
   .day-header { text-align: center; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding: 4px 0 6px; }
-  .day-cell { background: var(--surface); border: 1px solid var(--border); min-height: 72px; padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: border-color 0.12s; cursor: pointer; }
+  .day-cell { background: var(--surface); border: 1px solid var(--border); min-height: 72px; padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: border-color 0.12s; cursor: pointer; position: relative; }
   .day-cell:hover { border-color: var(--border2); }
   .day-cell.empty { background: transparent; border-color: transparent; pointer-events: none; }
   .day-cell.today { border-color: var(--accent); background: #0f120a; }
@@ -301,6 +312,53 @@
     .level-ref-table td:first-child { font-size: 15px; }
   }
 
+  /* ── MILESTONES PAGE ── */
+  .milestones-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    width: 100%;
+  }
+  .milestones-table th {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .milestones-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .milestones-table tr:last-child td {
+    border-bottom: none;
+  }
+  .milestones-table tr:hover {
+    background: var(--surface2);
+  }
+  .milestone-date {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+  }
+  .milestone-text {
+    color: var(--text);
+  }
+  .no-milestones {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
   /* ── OVERVIEW PAGE ── */
   .overview-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
   .overview-year-label { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.06em; color: var(--text); min-width: 80px; text-align: center; line-height: 1; }
@@ -337,6 +395,12 @@
     .overview-year-label { font-size: 28px; }
     .mscard-name { font-size: 15px; }
     .mscard-weight { font-size: 18px; }
+    /* Monthly weight calendar responsive */
+    #overviewMonthlyWeightCal .chart-card-title { font-size: 8px; }
+    #overviewMonthlyWeightCal > div > div { grid-template-columns: repeat(6, 1fr) !important; }
+    #overviewMonthlyWeightCal > div > div > div { padding: 6px 2px !important; }
+    #overviewMonthlyWeightCal > div > div > div > div:first-child { font-size: 7px !important; }
+    #overviewMonthlyWeightCal > div > div > div > div:last-child { font-size: 13px !important; }
   }
   @media (max-width: 360px) {
     .overview-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
@@ -454,7 +518,7 @@
 
     /* chart */
     .chart-card { padding: 12px 12px; }
-    #weightChart { height: 130px; }
+    #weightChartNarrow { height: 130px; }
 
     /* skills page */
     .skills-grid { grid-template-columns: 1fr; gap: 10px; }
@@ -507,6 +571,7 @@
   <button class="nav-tab active" onclick="showPage('calendar', this)">Calendar</button>
   <button class="nav-tab" onclick="showPage('overview', this)">Overview</button>
   <button class="nav-tab" onclick="showPage('skills', this)">Skills</button>
+  <button class="nav-tab" onclick="showPage('milestones', this)">Milestones</button>
 </nav>
 
 <!-- CALENDAR PAGE -->
@@ -568,6 +633,14 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
       </div>
 
+      <!-- Weight Chart in Sidebar -->
+      <div class="chart-card" style="margin:16px 0 0 0;padding:12px 14px">
+        <div class="chart-card-title">Weekly Avg Weight (kg)</div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+
       <div class="page-footer cal-sidebar-footer">
         <div class="footer-group">
           <span class="footer-label">Export</span>
@@ -596,6 +669,15 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
     </div>
+
+    <!-- Weight Chart Below Legend on Narrow Screens -->
+    <div class="chart-card" style="margin-top:16px;padding:12px 14px">
+      <div class="chart-card-title">Weekly Avg Weight (kg)</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <canvas id="weightChartNarrow"></canvas>
+      </div>
+    </div>
+
     <div class="page-footer">
       <div class="footer-group">
         <span class="footer-label">Export</span>
@@ -644,6 +726,13 @@
   </div>
 </div>
 
+<!-- MILESTONES PAGE -->
+<div class="page" id="page-milestones">
+  <div class="page-title">Milestones</div>
+  <div class="skills-intro">A record of your significant achievements and breakthroughs.</div>
+  <div id="milestonesTable"></div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="maybeCloseModal(event)">
   <div class="modal">
@@ -666,6 +755,10 @@
     <div id="modalNotesSection">
     <div class="modal-label">Notes</div>
     <textarea id="modalNotes" placeholder="How did it feel? PRs, fatigue, anything worth noting..."></textarea>
+    </div>
+    <div id="modalMilestoneSection">
+    <div class="modal-label">Milestone</div>
+    <textarea id="modalMilestone" placeholder="Record a significant achievement (e.g., 'First unassisted HSPU', 'Hit 70kg bodyweight')..." style="min-height:50px"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -914,8 +1007,9 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'skills')   renderSkillsPage();
-  if (id === 'overview') renderOverview();
+  if (id === 'skills')     renderSkillsPage();
+  if (id === 'overview')   renderOverview();
+  if (id === 'milestones') renderMilestones();
 }
 
 // ══════════════════════════════
@@ -1149,17 +1243,89 @@ function renderOverview() {
       Weight (${minW.toFixed(1)} → ${maxW.toFixed(1)} kg)
     </div>`;
 
-  // ── Weight chart ──
-  let chartCard = document.getElementById('overviewWeightChart');
-  if (!chartCard) {
-    chartCard = document.createElement('div');
-    chartCard.id = 'overviewWeightChart';
-    chartCard.className = 'chart-card';
-    chartCard.style.marginTop = '22px';
-    chartCard.innerHTML = '<div class="chart-card-title">Weekly Average Weight (kg)</div><canvas id="weightChart"></canvas>';
-    document.getElementById('page-overview').appendChild(chartCard);
+  // ── Monthly Average Weight Calendar ──
+  renderMonthlyWeightCalendar();
+}
+
+function renderMonthlyWeightCalendar() {
+  let calCard = document.getElementById('overviewMonthlyWeightCal');
+  if (!calCard) {
+    calCard = document.createElement('div');
+    calCard.id = 'overviewMonthlyWeightCal';
+    calCard.className = 'chart-card';
+    calCard.style.marginTop = '22px';
+    document.getElementById('page-overview').appendChild(calCard);
   }
-  renderWeightChart();
+
+  // Calculate monthly averages for the overview year
+  const monthlyAvgs = [];
+  for (let m = 0; m < 12; m++) {
+    const prefix = `${overviewYear}-${String(m+1).padStart(2,'0')}`;
+    const monthKeys = Object.keys(calData).filter(k => k.startsWith(prefix));
+    const weights = monthKeys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w) && w > 0);
+    const avg = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
+    monthlyAvgs.push(avg);
+  }
+
+  // Find min/max for color scaling (only non-null values)
+  const validAvgs = monthlyAvgs.filter(v => v !== null);
+  if (validAvgs.length === 0) {
+    calCard.innerHTML = '<div class="chart-card-title">Monthly Average Weight (kg)</div><div class="no-milestones">No weight data for this year</div>';
+    return;
+  }
+
+  const minWeight = Math.min(...validAvgs);
+  const maxWeight = Math.max(...validAvgs);
+  const range = Math.max(maxWeight - minWeight, 0.5);
+
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  
+  let html = '<div class="chart-card-title">Monthly Average Weight (kg)</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:8px">';
+  
+  monthlyAvgs.forEach((avg, m) => {
+    if (avg === null) {
+      html += `<div style="background:var(--surface2);border:1px solid var(--border);padding:8px 4px;text-align:center">
+        <div style="font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">${MONTHS[m]}</div>
+        <div style="font-size:10px;color:var(--muted2)">—</div>
+      </div>`;
+    } else {
+      // Color intensity based on weight (blue=low, orange=high)
+      const normalized = (avg - minWeight) / range;
+      const isHigh = normalized > 0.5;
+      const intensity = Math.abs(normalized - 0.5) * 2; // 0 to 1
+      
+      const bgColor = isHigh 
+        ? `rgba(255,112,67,${0.05 + intensity * 0.15})`
+        : `rgba(79,195,247,${0.05 + intensity * 0.15})`;
+      const textColor = isHigh ? '#ff7043' : '#4fc3f7';
+      
+      html += `<div style="background:${bgColor};border:1px solid var(--border);padding:8px 4px;text-align:center;cursor:pointer;transition:border-color 0.15s" 
+        onmouseover="this.style.borderColor='var(--accent)'" 
+        onmouseout="this.style.borderColor='var(--border)'"
+        onclick="goToMonth(${overviewYear}, ${m})">
+        <div style="font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${MONTHS[m]}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:0.04em;color:${textColor};line-height:1">${avg.toFixed(1)}</div>
+      </div>`;
+    }
+  });
+  
+  html += '</div>';
+  calCard.innerHTML = html;
+}
+
+function goToMonth(year, month) {
+  cy = year;
+  cm = month;
+  
+  // Switch to calendar tab
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-calendar').classList.add('active');
+  document.querySelector('.nav-tab').classList.add('active');
+  
+  renderCalendar();
+  window.scrollTo(0, 0);
 }
 
 // ══════════════════════════════
@@ -1240,12 +1406,24 @@ function renderCalendar() {
       cell.appendChild(ni);
     }
 
+    if (rec.milestone) {
+      const star = document.createElement('div');
+      star.className = 'milestone-star';
+      star.textContent = '★';
+      star.title = rec.milestone;
+      cell.appendChild(star);
+    }
+
     cell.addEventListener('click', () => openModal(k));
     grid.appendChild(cell);
   }
 
   updateStats();
   updateTodayBtn();
+  
+  // Render weight charts for both desktop and mobile
+  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
+  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
 }
 
 // ══════════════════════════════
@@ -1288,19 +1466,65 @@ function logWeightToday() {
 }
 
 // ══════════════════════════════
+//  MILESTONES PAGE
+// ══════════════════════════════
+function renderMilestones() {
+  const container = document.getElementById('milestonesTable');
+  if (!container) return;
+
+  // Collect all milestones from calData
+  const milestones = [];
+  Object.keys(calData).forEach(date => {
+    if (calData[date].milestone) {
+      milestones.push({
+        date: date,
+        text: calData[date].milestone
+      });
+    }
+  });
+
+  // Sort by date descending (most recent first)
+  milestones.sort((a, b) => b.date.localeCompare(a.date));
+
+  if (milestones.length === 0) {
+    container.innerHTML = '<div class="no-milestones">No milestones recorded yet. Click any day on the calendar to add your first achievement!</div>';
+    return;
+  }
+
+  let html = '<table class="milestones-table"><thead><tr><th>Date</th><th>Milestone</th></tr></thead><tbody>';
+  milestones.forEach(m => {
+    html += `<tr onclick="goToMilestoneDate('${m.date}')" style="cursor:pointer">
+      <td class="milestone-date">${prettyDate(m.date)}</td>
+      <td class="milestone-text">${m.text}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function goToMilestoneDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  cy = parseInt(y);
+  cm = parseInt(m) - 1;
+  
+  // Switch to calendar tab
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-calendar').classList.add('active');
+  document.querySelector('.nav-tab').classList.add('active');
+  
+  renderCalendar();
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════
 //  WEIGHT CHART (with trend line)
 // ══════════════════════════════
-function renderWeightChart() {
-  const canvas = document.getElementById('weightChart');
+function renderWeightChart(canvasId = 'weightChart') {
+  const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.offsetWidth || 600;
-  const H = 160;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, W, H);
 
   const weekMap = {};
   Object.keys(calData).sort().forEach(k => {
@@ -1314,18 +1538,36 @@ function renderWeightChart() {
 
   const weeks = Object.keys(weekMap).sort();
   if (!weeks.length) {
+    const H = canvasId === 'weightChart' ? 120 : 140;
+    canvas.width = 240 * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, 240, H);
     ctx.fillStyle = '#2a2a2a';
-    ctx.font = "11px 'DM Mono',monospace";
+    ctx.font = "9px 'DM Mono',monospace";
     ctx.textAlign = 'center';
-    ctx.fillText('No weight data yet — click any day to start logging', W/2, H/2);
+    ctx.fillText('No weight data', 120, H/2 - 6);
+    ctx.fillText('logged yet', 120, H/2 + 6);
     return;
   }
 
   const avgs = weeks.map(w => weekMap[w].reduce((a,b)=>a+b,0)/weekMap[w].length);
+  
+  // Calculate chart dimensions - narrower for sidebar
+  const H = canvasId === 'weightChart' ? 120 : 140;
+  const pixelsPerWeek = 35; // Compact spacing for sidebar
+  const minWidth = Math.max(240, weeks.length * pixelsPerWeek);
+  const W = minWidth;
+  
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
   const minV = Math.min(...avgs) - 0.8;
   const maxV = Math.max(...avgs) + 0.8;
   const range = maxV - minV || 1;
-  const pL=42, pR=14, pT=10, pB=26;
+  const pL=32, pR=10, pT=18, pB=20;
   const cW = W-pL-pR, cH = H-pT-pB;
   const xOf = i => pL + (weeks.length<2 ? cW/2 : (i/(weeks.length-1))*cW);
   const yOf = v => pT + cH - ((v-minV)/range)*cH;
@@ -1335,7 +1577,7 @@ function renderWeightChart() {
     const gv = minV + (range/3)*g, gy = yOf(gv);
     ctx.strokeStyle = '#1d1d1d'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(W-pR, gy); ctx.stroke();
-    ctx.fillStyle = '#3a3a3a'; ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
     ctx.fillText(gv.toFixed(1), pL-4, gy+3);
   }
 
@@ -1353,7 +1595,6 @@ function renderWeightChart() {
   ctx.stroke();
 
   // ── Per-year trend lines (resets each January) ──
-  // Group week indices by year, run a separate regression per year
   const yearGroups = {};
   weeks.forEach((w, i) => {
     const yr = w.slice(0, 4);
@@ -1385,24 +1626,60 @@ function renderWeightChart() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // direction label at end of each segment
     const dir = slope > 0.05 ? '▲' : slope < -0.05 ? '▼' : '—';
     const col = slope > 0.05 ? '#ff7043' : slope < -0.05 ? '#4fc3f7' : '#555';
     ctx.fillStyle = col;
-    ctx.font = "8px 'DM Mono',monospace";
+    ctx.font = "7px 'DM Mono',monospace";
     ctx.textAlign = 'right';
-    ctx.fillText(dir, x1 - 2, y1 - 5);
+    ctx.fillText(dir, x1 - 2, y1 - 4);
+  });
+
+  // ── Find peaks and troughs per month ──
+  const monthlyExtremes = {};
+  weeks.forEach((week, i) => {
+    const monthKey = week.slice(0, 7); // YYYY-MM
+    if (!monthlyExtremes[monthKey]) {
+      monthlyExtremes[monthKey] = { peak: { i: i, v: avgs[i] }, trough: { i: i, v: avgs[i] } };
+    } else {
+      if (avgs[i] > monthlyExtremes[monthKey].peak.v) {
+        monthlyExtremes[monthKey].peak = { i: i, v: avgs[i] };
+      }
+      if (avgs[i] < monthlyExtremes[monthKey].trough.v) {
+        monthlyExtremes[monthKey].trough = { i: i, v: avgs[i] };
+      }
+    }
+  });
+
+  // Draw peak/trough labels
+  Object.values(monthlyExtremes).forEach(({ peak, trough }) => {
+    if (peak.i === trough.i) {
+      // Only one data point in month, just show it
+      ctx.fillStyle = '#c8ff00';
+      ctx.font = "8px 'DM Mono',monospace";
+      ctx.textAlign = 'center';
+      ctx.fillText(peak.v.toFixed(1), xOf(peak.i), yOf(peak.v) - 6);
+    } else {
+      // Peak label (above)
+      ctx.fillStyle = '#ff7043';
+      ctx.font = "8px 'DM Mono',monospace";
+      ctx.textAlign = 'center';
+      ctx.fillText(peak.v.toFixed(1), xOf(peak.i), yOf(peak.v) - 6);
+      
+      // Trough label (below)
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fillText(trough.v.toFixed(1), xOf(trough.i), yOf(trough.v) + 10);
+    }
   });
 
   // Dots + x-axis labels
-  const labelStep = Math.max(1, Math.floor(weeks.length/7));
+  const labelStep = Math.max(1, Math.floor(weeks.length/8));
   avgs.forEach((v,i) => {
-    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2);
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
     ctx.fillStyle = '#c8ff00'; ctx.fill();
     if (i % labelStep === 0 || i === weeks.length-1) {
       const p = weeks[i].split('-');
-      ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
-      ctx.fillText(`${p[2]}/${p[1]}`, xOf(i), H-pB+12);
+      ctx.fillStyle = '#3a3a3a'; ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${p[2]}/${p[1]}`, xOf(i), H-pB+10);
     }
   });
 }
@@ -1457,7 +1734,7 @@ function updateTodayBtn() {
   const ANGLE_THRESHOLD = 35;
 
   // Tab order for tab-swipe navigation
-  const TAB_IDS = ['calendar', 'overview', 'skills'];
+  const TAB_IDS = ['calendar', 'overview', 'skills', 'milestones'];
 
   function getActiveTab() {
     const active = document.querySelector('.nav-tab.active');
@@ -1537,6 +1814,7 @@ function openModal(k, mode) {
   document.getElementById('modalTitle').textContent = prettyDate(k);
   document.getElementById('modalWeight').value = rec.weight || '';
   document.getElementById('modalNotes').value = rec.notes || '';
+  document.getElementById('modalMilestone').value = rec.milestone || '';
   const mw = document.getElementById('modalWorkouts');
   mw.innerHTML = '';
   const ws = (rec.workouts && rec.workouts.length) ? rec.workouts : [''];
@@ -1546,10 +1824,12 @@ function openModal(k, mode) {
   const showWeight   = !mode || mode === 'weight';
   const showWorkouts = !mode || mode === 'workout';
   const showNotes    = !mode;
+  const showMilestone = !mode;
 
   document.getElementById('modalWeightSection').style.display   = showWeight   ? '' : 'none';
   document.getElementById('modalWorkoutsSection').style.display = showWorkouts ? '' : 'none';
   document.getElementById('modalNotesSection').style.display    = showNotes    ? '' : 'none';
+  document.getElementById('modalMilestoneSection').style.display = showMilestone ? '' : 'none';
 
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -1575,11 +1855,12 @@ async function saveModal() {
   if (!modalKey) return;
   const weight = document.getElementById('modalWeight').value;
   const notes  = document.getElementById('modalNotes').value;
+  const milestone = document.getElementById('modalMilestone').value;
   const workouts = Array.from(document.getElementById('modalWorkouts').querySelectorAll('select'))
     .map(s => s.value).filter(v => v !== '');
 
-  if (weight || workouts.length || notes) {
-    calData[modalKey] = { weight, workouts, notes };
+  if (weight || workouts.length || notes || milestone) {
+    calData[modalKey] = { weight, workouts, notes, milestone };
   } else {
     delete calData[modalKey];
   }
@@ -2007,7 +2288,8 @@ const DEFAULT_CONFIG = {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
 window.addEventListener('resize', () => {
-  if (document.getElementById('weightChart')) renderWeightChart();
+  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
+  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
   if (document.getElementById('page-skills').classList.contains('active')) renderSkillHistoryChart();
 });
 
