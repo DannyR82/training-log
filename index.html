@@ -1261,7 +1261,7 @@ function renderOverview() {
       Weight (${minW.toFixed(1)} → ${maxW.toFixed(1)} kg)
     </div>`;
 
-  // ── Monthly Average Weight Calendar ──
+  // ── Monthly Average Weight Chart ──
   renderMonthlyWeightChart();
 }
 
@@ -1272,7 +1272,7 @@ function renderMonthlyWeightChart() {
     chartCard.id = 'overviewMonthlyWeightChart';
     chartCard.className = 'chart-card';
     chartCard.style.marginTop = '22px';
-    chartCard.innerHTML = '<div class="chart-card-title">Weight History - All Data</div><canvas id="overviewWeightLineChart"></canvas>';
+    chartCard.innerHTML = '<div class="chart-card-title">Monthly Average Weight History</div><canvas id="overviewWeightLineChart"></canvas>';
     document.getElementById('page-overview').appendChild(chartCard);
   }
 
@@ -1282,13 +1282,22 @@ function renderMonthlyWeightChart() {
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   
-  // Collect all weight data points (not weekly averages, actual recorded weights)
-  const dataPoints = [];
+  // Calculate monthly averages for ALL months in the dataset
+  const monthlyData = {};
   Object.keys(calData).sort().forEach(date => {
     const w = parseFloat(calData[date].weight);
     if (!isNaN(w) && w > 0) {
-      dataPoints.push({ date, weight: w });
+      const monthKey = date.slice(0, 7); // YYYY-MM
+      if (!monthlyData[monthKey]) monthlyData[monthKey] = [];
+      monthlyData[monthKey].push(w);
     }
+  });
+
+  // Convert to array of {month, avgWeight}
+  const dataPoints = Object.keys(monthlyData).sort().map(monthKey => {
+    const weights = monthlyData[monthKey];
+    const avgWeight = weights.reduce((a,b)=>a+b,0) / weights.length;
+    return { month: monthKey, weight: avgWeight };
   });
 
   if (dataPoints.length === 0) {
@@ -1370,7 +1379,7 @@ function renderMonthlyWeightChart() {
   // Per-year trend lines
   const yearGroups = {};
   dataPoints.forEach((p, i) => {
-    const yr = p.date.slice(0, 4);
+    const yr = p.month.slice(0, 4);
     if (!yearGroups[yr]) yearGroups[yr] = [];
     yearGroups[yr].push({ i, v: p.weight });
   });
@@ -1412,23 +1421,25 @@ function renderMonthlyWeightChart() {
   // Data points
   dataPoints.forEach((p, i) => {
     ctx.beginPath();
-    ctx.arc(xOf(i), yOf(p.weight), 2, 0, Math.PI*2);
+    ctx.arc(xOf(i), yOf(p.weight), 2.5, 0, Math.PI*2);
     ctx.fillStyle = '#c8ff00';
     ctx.fill();
   });
 
-  // X-axis labels - show dates at intervals with year highlighting
+  // X-axis labels - show month/year at intervals with year highlighting
   const labelStep = Math.max(1, Math.floor(dataPoints.length / 10));
   let lastYear = null;
   
   dataPoints.forEach((p, i) => {
     if (i % labelStep === 0 || i === dataPoints.length - 1) {
-      const [year, month, day] = p.date.split('-');
+      const [year, month] = p.month.split('-');
       const isNewYear = lastYear !== null && year !== lastYear;
       lastYear = year;
       
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthLabel = monthNames[parseInt(month) - 1];
       const yy = year.slice(2);
-      const dateLabel = `${day}/${month}/${yy}`;
+      const dateLabel = `${monthLabel} '${yy}`;
       
       ctx.font = "8px 'DM Mono',monospace";
       ctx.textAlign = 'center';
