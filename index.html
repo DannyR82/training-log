@@ -71,13 +71,13 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     cursor: pointer;
     border: 1px solid var(--border2);
-    padding: 6px 12px;
+    padding: 7px 14px;
     transition: all 0.15s;
     user-select: none;
     background: transparent;
@@ -1063,7 +1063,7 @@ function renderOverview() {
     const monthKeys = Object.keys(calData).filter(k => k.startsWith(prefix));
     const weights   = monthKeys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w) && w > 0);
     const avgWeight    = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
-    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w).length), 0);
+    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w && w !== 'cycle').length), 0);
 
     const milestones = [];
     SKILLS.forEach(sk => {
@@ -1144,7 +1144,15 @@ function renderOverview() {
       wLbl.textContent = 'avg weight';
       card.appendChild(wLbl);
 
-      // Workout count
+      // Cycle count (now first)
+      if (cycleCount > 0) {
+        const cyEl = document.createElement('div');
+        cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:2px;font-weight:600';
+        cyEl.textContent = `${cycleCount} commute${cycleCount !== 1 ? 's' : ''}`;
+        card.appendChild(cyEl);
+      }
+
+      // Workout count (now second)
       const woEl = document.createElement('div');
       woEl.className = 'mscard-workouts';
       if (workoutCount) {
@@ -1155,14 +1163,6 @@ function renderOverview() {
         woEl.style.color = 'var(--accent)';
       }
       card.appendChild(woEl);
-
-      // Cycle count
-      if (cycleCount > 0) {
-        const cyEl = document.createElement('div');
-        cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:1px';
-        cyEl.textContent = `🚲 ${cycleCount} commute${cycleCount !== 1 ? 's' : ''}`;
-        card.appendChild(cyEl);
-      }
 
       // Skills dots + milestone star on same row
       const skillsRow = document.createElement('div');
@@ -1788,28 +1788,52 @@ function renderWeightChart(canvasId = 'weightChart') {
     }
   });
 
-  // Dots + x-axis labels with dd/mm/yy format and new year highlighting
+  // Dots + x-axis labels with dd/mm/yy format and new year vertical line
   const labelStep = Math.max(1, Math.floor(weeks.length/12));
   let lastYear = null;
   
   avgs.forEach((v,i) => {
-    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
-    ctx.fillStyle = '#c8ff00'; ctx.fill();
+    const [year, month, day] = weeks[i].split('-');
     
+    // Draw data point
+    ctx.beginPath(); 
+    ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
+    ctx.fillStyle = '#c8ff00'; 
+    ctx.fill();
+    
+    // Draw date label
     if (i % labelStep === 0 || i === weeks.length-1) {
-      const [year, month, day] = weeks[i].split('-');
-      const isNewYear = lastYear !== null && year !== lastYear;
-      lastYear = year;
-      
-      // Format as dd/mm/yy
       const yy = year.slice(2);
       const dateLabel = `${day}/${month}/${yy}`;
       
       ctx.font = "7px 'DM Mono',monospace";
       ctx.textAlign = 'center';
-      ctx.fillStyle = isNewYear ? '#c8ff00' : '#3a3a3a';
+      ctx.fillStyle = '#3a3a3a';
       ctx.fillText(dateLabel, xOf(i), H-pB+10);
     }
+    
+    lastYear = year;
+  });
+  
+  // Draw new year vertical lines (separate pass to ensure they appear)
+  let prevYear = null;
+  weeks.forEach((week, i) => {
+    const [year, month] = week.split('-');
+    
+    // Check if this is a new year AND we're in January
+    if (prevYear !== null && year !== prevYear && month === '01') {
+      // Draw vertical line at this position (first week of January in new year)
+      ctx.strokeStyle = '#c8ff00';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(xOf(i), pT);
+      ctx.lineTo(xOf(i), H - pB);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    
+    prevYear = year;
   });
   
   // Scroll to right (most recent data) after rendering
