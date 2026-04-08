@@ -1145,12 +1145,16 @@ function renderOverview() {
       card.appendChild(wLbl);
 
       // Cycle count (now first)
+      const cyEl = document.createElement('div');
+      cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:2px;font-weight:600';
       if (cycleCount > 0) {
-        const cyEl = document.createElement('div');
-        cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:2px;font-weight:600';
-        cyEl.textContent = `${cycleCount} commute${cycleCount !== 1 ? 's' : ''}`;
-        card.appendChild(cyEl);
+        cyEl.textContent = `${cycleCount} cycle commute${cycleCount !== 1 ? 's' : ''}`;
+      } else {
+        cyEl.textContent = 'No cycle commutes logged';
+        cyEl.style.fontWeight = '400';
+        cyEl.style.color = '#fbbf24';
       }
+      card.appendChild(cyEl);
 
       // Workout count (now second)
       const woEl = document.createElement('div');
