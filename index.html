@@ -1146,11 +1146,11 @@ function renderOverview() {
 
       // Cycle count (now first)
       const cyEl = document.createElement('div');
-      cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:2px;font-weight:600';
+      cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:1px;font-weight:600';
       if (cycleCount > 0) {
         cyEl.textContent = `${cycleCount} cycle commute${cycleCount !== 1 ? 's' : ''}`;
       } else {
-        cyEl.textContent = 'No cycle commutes logged';
+        cyEl.textContent = 'No cycles logged';
         cyEl.style.fontWeight = '400';
         cyEl.style.color = '#fbbf24';
       }
@@ -1159,6 +1159,7 @@ function renderOverview() {
       // Workout count (now second)
       const woEl = document.createElement('div');
       woEl.className = 'mscard-workouts';
+      woEl.style.marginTop = '1px';
       if (workoutCount) {
         woEl.textContent = `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`;
       } else {
@@ -1170,7 +1171,7 @@ function renderOverview() {
 
       // Skills dots + milestone star on same row
       const skillsRow = document.createElement('div');
-      skillsRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;align-items:center';
+      skillsRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;align-items:center';
       const monthEnd = `${overviewYear}-${String(m+1).padStart(2,'0')}-31`;
       let anySkill = false;
       SKILLS.forEach(sk => {
