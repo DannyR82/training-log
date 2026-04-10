@@ -137,11 +137,33 @@
   }
 
   /* Milestone star in calendar cell */
-  .milestone-star {
+  .day-indicators {
     position: absolute;
     top: 4px;
     right: 4px;
-    font-size: 11px;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  
+  .indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  
+  .cycle-dot {
+    background: #fbbf24;
+  }
+  
+  .note-dot {
+    background: #777;
+    opacity: 0.8;
+  }
+  
+  .indicator-star {
+    font-size: 10px;
     color: var(--accent);
     line-height: 1;
   }
@@ -649,6 +671,9 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Cycle Commute</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8"></div>Notes</div>
+        <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
       </div>
 
       <div class="page-footer cal-sidebar-footer">
@@ -686,6 +711,9 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Cycle Commute</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8"></div>Notes</div>
+      <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
     </div>
 
     <!-- Weight Chart Below Legend on Narrow Screens -->
@@ -1511,6 +1539,8 @@ function renderCalendar() {
       const br = document.createElement('div');
       br.className = 'badges-row';
       workouts.forEach(exv => {
+        // Skip cycle - it will be shown as a dot in top right
+        if (exv === 'cycle') return;
         const cfg = EX[exv];
         if (cfg && cfg.badge) {
           const b = document.createElement('span');
@@ -1521,23 +1551,41 @@ function renderCalendar() {
           br.appendChild(b);
         }
       });
-      cell.appendChild(br);
+      if (br.children.length > 0) cell.appendChild(br);
     }
 
+    // Top right indicators container
+    const indicators = document.createElement('div');
+    indicators.className = 'day-indicators';
+    
+    // Cycle dot (amber)
+    const hasCycle = (rec.workouts || []).includes('cycle');
+    if (hasCycle) {
+      const cycleDot = document.createElement('div');
+      cycleDot.className = 'indicator-dot cycle-dot';
+      cycleDot.title = 'Cycle commute';
+      indicators.appendChild(cycleDot);
+    }
+    
+    // Note dot (grey)
     if (rec.notes) {
-      const ni = document.createElement('div');
-      ni.title = rec.notes;
-      ni.style.cssText = 'margin-top:auto;display:flex;align-items:center;gap:3px;padding-top:2px';
-      ni.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:#777;flex-shrink:0;display:inline-block;opacity:0.8"></span><span style="font-size:8px;color:#777;opacity:0.7;letter-spacing:0.04em;line-height:1">note</span>';
-      cell.appendChild(ni);
+      const noteDot = document.createElement('div');
+      noteDot.className = 'indicator-dot note-dot';
+      noteDot.title = rec.notes;
+      indicators.appendChild(noteDot);
     }
 
+    // Milestone star
     if (rec.milestone) {
       const star = document.createElement('div');
-      star.className = 'milestone-star';
+      star.className = 'indicator-star';
       star.textContent = '★';
       star.title = rec.milestone;
-      cell.appendChild(star);
+      indicators.appendChild(star);
+    }
+    
+    if (indicators.children.length > 0) {
+      cell.appendChild(indicators);
     }
 
     cell.addEventListener('click', () => openModal(k));
