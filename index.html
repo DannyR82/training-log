@@ -123,13 +123,7 @@
     overscroll-behavior-x: contain;
   }
 
-  /* Desktop: show bottom chart, hide narrow chart */
-  .cal-desktop-chart { display: block; }
-  @media (max-width: 1199px) {
-    .cal-desktop-chart { display: none; }
-  }
 
-  /* Milestone star + corner indicators in calendar cell */
   .day-indicators {
     position: absolute;
     top: 4px;
@@ -143,6 +137,7 @@
     border-radius: 50%; flex-shrink: 0;
   }
   .cycle-dot { background: #fbbf24; }
+  .sick-dot  { background: #ef4444; opacity: 0.9; }
   .note-dot  { background: #777; opacity: 0.8; }
   .indicator-star { font-size: 10px; color: var(--accent); line-height: 1; }
 
@@ -609,17 +604,12 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
         <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;border-radius:50%;width:7px;height:7px"></div>Cycle Commute</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444;border-radius:50%;width:7px;height:7px"></div>Sick</div>
         <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8;border-radius:50%;width:7px;height:7px"></div>Notes</div>
         <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
       </div>
 
       <!-- Weight Chart - Desktop Sidebar Position -->
-      <div class="chart-card cal-desktop-chart" style="padding:12px 14px">
-        <div class="chart-card-title">Weekly Avg Weight (kg)</div>
-        <div class="chart-scroll-container">
-          <canvas id="weightChart"></canvas>
-        </div>
-      </div>
 
       <div class="page-footer cal-sidebar-footer">
         <div class="footer-group">
@@ -649,17 +639,12 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
       <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;border-radius:50%;width:7px;height:7px"></div>Cycle Commute</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444;border-radius:50%;width:7px;height:7px"></div>Sick</div>
       <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8;border-radius:50%;width:7px;height:7px"></div>Notes</div>
       <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
     </div>
 
     <!-- Weight Chart below legend on narrow screens -->
-    <div class="chart-card" style="margin-top:16px;padding:12px 14px">
-      <div class="chart-card-title">Weekly Avg Weight (kg)</div>
-      <div class="chart-scroll-container">
-        <canvas id="weightChartNarrow"></canvas>
-      </div>
-    </div>
     <div class="page-footer">
       <div class="footer-group">
         <span class="footer-label">Export</span>
@@ -678,6 +663,14 @@
       </div>
     </div>
   </div>
+
+  <!-- Weight chart — inside calendar page, shows below cal-layout -->
+  <div class="chart-card" id="calWeightChart" style="padding:10px 14px 8px;margin-top:10px">
+    <div class="chart-card-title">Weekly Avg Weight (kg)</div>
+    <div class="chart-scroll-container">
+      <canvas id="weightChart"></canvas>
+    </div>
+  </div>
 </div>
 
 <!-- OVERVIEW PAGE -->
@@ -692,6 +685,12 @@
     <canvas id="overviewCanvas"></canvas>
   </div>
   <div class="overview-legend" id="overviewLegend"></div>
+  <div class="chart-card" style="margin-top:14px;padding:10px 14px 8px">
+    <div class="chart-card-title">Monthly Average Weight (kg) — all time</div>
+    <div class="chart-scroll-container">
+      <canvas id="monthlyWeightChart"></canvas>
+    </div>
+  </div>
 </div>
 
 <!-- SKILLS PAGE -->
@@ -951,6 +950,7 @@ const EXERCISES = [
   { v: 'leg',    label: 'Legs (SL squat / Nordics)',                 badge: 'Legs',       short: 'Legs', cls: 'badge-leg' },
   { v: 'hscrow', label: 'Handstands & Crows',                       badge: 'HS & Crow',  short: 'HS',   cls: 'badge-vc' },
   { v: 'cycle',  label: 'Cycle Commute',                             badge: 'C',          short: 'C',    cls: 'badge-cycle' },
+  { v: 'sick',   label: 'Sick',                                      badge: '',           short: '',     cls: '' },
 ];
 const EX = {};
 EXERCISES.forEach(e => EX[e.v] = e);
@@ -1021,7 +1021,7 @@ function renderOverview() {
     const monthKeys = Object.keys(calData).filter(k => k.startsWith(prefix));
     const weights   = monthKeys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w) && w > 0);
     const avgWeight = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
-    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w && w!=='cycle').length), 0);
+    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w && w!=='cycle' && w!=='sick').length), 0);
     const cycleCount   = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w==='cycle').length), 0);
 
     // Skill sum: sum of current levels at end of this month
@@ -1042,18 +1042,19 @@ function renderOverview() {
   const minW = allWeights.length ? Math.min(...allWeights) - 1.5 : 60;
   const maxW = allWeights.length ? Math.max(...allWeights) + 1.5 : 80;
 
-  // ── Canvas setup ──
+  // ── Canvas setup — fit container width, no scroll ──
   const canvas = document.getElementById('overviewCanvas');
   if (!canvas) return;
   const dpr = window.devicePixelRatio || 1;
-  const colW   = 52;   // px per month column
-  const pL     = 44;   // left axis padding (for weight scale)
-  const pR     = 10;
-  const pT     = 60;   // top padding for weight overlay labels
-  const pB     = 46;   // bottom padding for skill sum + month labels
-  const barH   = 220;  // height of the bar chart area
+  const containerW = canvas.parentElement.clientWidth || 360;
+  const pL     = 0;    // no y-axis
+  const pR     = 6;
+  const pT     = 56;   // top padding for weight overlay labels
+  const pB     = 38;   // bottom padding for skill sum + month labels
+  const barH   = 180;  // height of the bar chart area
   const totalH = pT + barH + pB;
-  const totalW = pL + 12 * colW + pR;
+  const totalW = containerW;
+  const colW   = (totalW - pL - pR) / 12;
 
   canvas.style.width  = totalW + 'px';
   canvas.style.height = totalH + 'px';
@@ -1067,27 +1068,21 @@ function renderOverview() {
   const colText  = isLight ? '#1a1a1a' : '#e0e0e0';
   const mutedCol = isLight ? '#888' : '#555';
   const gridCol  = isLight ? '#e0e0e0' : '#1e1e1e';
-  const surfaceCol = isLight ? '#f4f4f0' : '#0a0a0a';
 
-  // ── Grid lines (bar area) ──
+  // ── Grid lines (bar area, no y-axis labels) ──
   for (let g = 0; g <= 4; g++) {
     const gy = pT + barH - (g / 4) * barH;
     ctx.strokeStyle = gridCol; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(pL + 12 * colW, gy); ctx.stroke();
-    // left axis labels (workout count)
-    const val = Math.round((g / 4) * maxTotal);
-    ctx.fillStyle = mutedCol; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
-    ctx.fillText(val, pL - 5, gy + 3);
+    ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(totalW - pR, gy); ctx.stroke();
   }
 
   // ── Draw bars + labels ──
   monthData.forEach((d, m) => {
     const isFuture  = new Date(overviewYear, m, 1) > today;
     const isCurrent = overviewYear === today.getFullYear() && m === today.getMonth();
-    const cx = pL + m * colW + colW / 2;  // centre x of this month
+    const cx = pL + m * colW + colW / 2;
 
     if (isFuture) {
-      // faint month label only
       ctx.fillStyle = mutedCol + '44';
       ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'center';
       ctx.fillText(MONTHS_SHORT[m], cx, pT + barH + 14);
@@ -1097,7 +1092,7 @@ function renderOverview() {
     const workoutH = barH * (d.workoutCount / maxTotal);
     const cycleH   = barH * (d.cycleCount   / maxTotal);
     const totalBarH = workoutH + cycleH;
-    const barW  = colW * 0.62;
+    const barW  = colW * 0.72;
     const barX  = cx - barW / 2;
 
     // Workout bar (bottom, yellow-green)
@@ -1105,22 +1100,18 @@ function renderOverview() {
       const gy0 = pT + barH;
       ctx.fillStyle = isCurrent ? 'rgba(200,255,0,0.85)' : 'rgba(200,255,0,0.55)';
       ctx.fillRect(barX, gy0 - workoutH, barW, workoutH);
-
-      // workout count label centred in workout segment
       if (workoutH > 14) {
-        ctx.fillStyle = isLight ? '#0a0a0a' : '#0a0a0a';
+        ctx.fillStyle = '#0a0a0a';
         ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
         ctx.fillText(d.workoutCount, cx, gy0 - workoutH / 2 + 3.5);
       }
     }
 
-    // Cycle bar (on top, orange)
+    // Cycle bar (on top, amber)
     if (d.cycleCount > 0) {
       const cy0 = pT + barH - workoutH;
       ctx.fillStyle = isCurrent ? 'rgba(251,191,36,0.9)' : 'rgba(251,191,36,0.65)';
       ctx.fillRect(barX, cy0 - cycleH, barW, cycleH);
-
-      // cycle count label centred in cycle segment
       if (cycleH > 14) {
         ctx.fillStyle = '#0a0a0a';
         ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
@@ -1128,28 +1119,27 @@ function renderOverview() {
       }
     }
 
-    // Current month marker: subtle accent border
+    // Current month accent border
     if (isCurrent && totalBarH > 0) {
-      ctx.strokeStyle = '#c8ff00';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#c8ff00'; ctx.lineWidth = 1.5;
       ctx.strokeRect(barX, pT + barH - totalBarH, barW, totalBarH);
     }
 
     // Month label
     ctx.fillStyle = isCurrent ? '#c8ff00' : colText;
-    ctx.font = (isCurrent ? "500 " : "") + "9px 'DM Mono',monospace";
+    ctx.font = (isCurrent ? "bold " : "") + "9px 'DM Mono',monospace";
     ctx.textAlign = 'center';
     ctx.fillText(MONTHS_SHORT[m], cx, pT + barH + 14);
 
-    // Skill sum at the very base (below month label)
+    // Skill sum — bold, accent colour, no prefix
     if (d.skillSum > 0) {
-      ctx.fillStyle = mutedCol;
-      ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
-      ctx.fillText('sk:' + d.skillSum, cx, pT + barH + 28);
+      ctx.fillStyle = '#c8ff00';
+      ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(d.skillSum, cx, pT + barH + 28);
     }
   });
 
-  // ── Weight overlay line ──
+  // ── Weight overlay line (yellow-green) ──
   const weightPoints = [];
   monthData.forEach((d, m) => {
     if (d.avgWeight === null) return;
@@ -1157,14 +1147,13 @@ function renderOverview() {
     if (isFuture) return;
     const cx = pL + m * colW + colW / 2;
     const wRange = maxW - minW || 1;
-    // map weight to top area: weight line floats in pT zone (y from 6 to pT-6)
     const wy = pT - 6 - ((d.avgWeight - minW) / wRange) * (pT - 18);
     weightPoints.push({ m, cx, wy, avgWeight: d.avgWeight });
   });
 
   if (weightPoints.length > 1) {
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,171,145,0.85)';
+    ctx.strokeStyle = 'rgba(200,255,0,0.8)';
     ctx.lineWidth = 2; ctx.lineJoin = 'round';
     weightPoints.forEach((p, i) => {
       if (i === 0) ctx.moveTo(p.cx, p.wy); else ctx.lineTo(p.cx, p.wy);
@@ -1174,17 +1163,14 @@ function renderOverview() {
 
   // Dots + weight labels
   weightPoints.forEach((p, i) => {
-    // Dot
     ctx.beginPath();
     ctx.arc(p.cx, p.wy, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffab91'; ctx.fill();
+    ctx.fillStyle = '#c8ff00'; ctx.fill();
 
-    // Weight value above dot
-    ctx.fillStyle = '#ffab91';
+    ctx.fillStyle = '#c8ff00';
     ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
     ctx.fillText(p.avgWeight.toFixed(1), p.cx, p.wy - 7);
 
-    // Delta indicator vs previous month with data
     if (i > 0) {
       const prev = weightPoints[i - 1];
       const delta = p.avgWeight - prev.avgWeight;
@@ -1198,17 +1184,6 @@ function renderOverview() {
     }
   });
 
-  // ── Weight axis (right side label) ──
-  if (weightPoints.length) {
-    const wRange = maxW - minW || 1;
-    [minW + 1, (minW + maxW) / 2, maxW - 1].forEach(wv => {
-      const wy = pT - 6 - ((wv - minW) / wRange) * (pT - 18);
-      ctx.fillStyle = 'rgba(255,171,145,0.45)';
-      ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'right';
-      ctx.fillText(wv.toFixed(0) + 'kg', pL - 5, wy + 2.5);
-    });
-  }
-
   // ── Legend ──
   const legend = document.getElementById('overviewLegend');
   legend.innerHTML = `
@@ -1221,12 +1196,44 @@ function renderOverview() {
       Cycle commutes
     </div>
     <div class="overview-legend-item">
-      <div class="overview-legend-dot" style="background:#ffab91"></div>
+      <div class="overview-legend-dot" style="background:#c8ff00"></div>
       Avg weight (kg)
     </div>
-    <div class="overview-legend-item" style="color:${mutedCol}">
-      sk: sum of skill levels
+    <div class="overview-legend-item" style="color:#c8ff00;font-weight:bold">
+      Σ skill level sum
     </div>`;
+
+  // ── Click to jump to month ──
+  canvas.style.cursor = 'pointer';
+  canvas._overviewColW = colW;
+  canvas._overviewPL   = pL;
+  canvas._overviewYear = overviewYear;
+
+  if (!canvas._clickHandlerAttached) {
+    canvas._clickHandlerAttached = true;
+    canvas.addEventListener('click', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
+      const x = (e.clientX - rect.left);
+      const colWNow  = canvas._overviewColW;
+      const pLNow    = canvas._overviewPL;
+      const yearNow  = canvas._overviewYear;
+      const m = Math.floor((x - pLNow) / colWNow);
+      if (m < 0 || m > 11) return;
+      const clickedDate = new Date(yearNow, m, 1);
+      if (clickedDate > new Date()) return; // ignore future months
+      cy = yearNow;
+      cm = m;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('page-calendar').classList.add('active');
+      document.querySelector('.nav-tab').classList.add('active');
+      renderCalendar();
+      window.scrollTo(0, 0);
+    });
+  }
+
+  renderMonthlyWeightChart();
 }
 
 // ══════════════════════════════
@@ -1287,6 +1294,7 @@ function renderCalendar() {
       br.className = 'badges-row';
       workouts.forEach(exv => {
         if (exv === 'cycle') return; // cycle shown as corner dot
+        if (exv === 'sick')  return; // sick shown as corner dot
         const cfg = EX[exv];
         if (cfg && cfg.badge) {
           const b = document.createElement('span');
@@ -1310,6 +1318,13 @@ function renderCalendar() {
       cycleDot.title = 'Cycle commute';
       indicators.appendChild(cycleDot);
     }
+    const hasSick = (rec.workouts || []).includes('sick');
+    if (hasSick) {
+      const sickDot = document.createElement('div');
+      sickDot.className = 'indicator-dot sick-dot';
+      sickDot.title = 'Sick';
+      indicators.appendChild(sickDot);
+    }
     if (rec.notes) {
       const noteDot = document.createElement('div');
       noteDot.className = 'indicator-dot note-dot';
@@ -1331,8 +1346,7 @@ function renderCalendar() {
 
   updateStats();
   updateTodayBtn();
-  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
-  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
+  renderWeightChart();
 }
 
 // ══════════════════════════════
@@ -1342,7 +1356,7 @@ function updateStats() {
   const prefix = `${cy}-${String(cm+1).padStart(2,'0')}`;
   const keys = Object.keys(calData).filter(k => k.startsWith(prefix));
   // workouts excludes cycles from the count
-  const totalW = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w && w !== 'cycle').length), 0);
+  const totalW = keys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w && w !== 'cycle' && w !== 'sick').length), 0);
   document.getElementById('statWorkouts').textContent = totalW;
   const weights = keys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w));
   document.getElementById('statCurrWeight').textContent = weights.length ? weights[weights.length-1].toFixed(1) : '—';
@@ -1377,11 +1391,14 @@ function logWeightToday() {
 // ══════════════════════════════
 //  WEIGHT CHART (with trend line)
 // ══════════════════════════════
-function renderWeightChart(canvasId = 'weightChart') {
-  const canvas = document.getElementById(canvasId);
+function renderWeightChart() {
+  const canvas = document.getElementById('weightChart');
   if (!canvas) return;
+  // Only render when calendar tab is active
+  if (!document.getElementById('page-calendar').classList.contains('active')) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
+  const H = 90;
 
   const weekMap = {};
   Object.keys(calData).sort().forEach(k => {
@@ -1392,9 +1409,7 @@ function renderWeightChart(canvasId = 'weightChart') {
       weekMap[mon].push(w);
     }
   });
-
   const weeks = Object.keys(weekMap).sort();
-  const H = canvasId === 'weightChart' ? 120 : 140;
 
   if (!weeks.length) {
     canvas.width = 240 * dpr; canvas.height = H * dpr;
@@ -1421,7 +1436,7 @@ function renderWeightChart(canvasId = 'weightChart') {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const pL=32, pR=10, pT=18, pB=20;
+  const pL=32, pR=10, pT=22, pB=20;
   const cW = W-pL-pR, cH = H-pT-pB;
   const xOf = i => pL + (weeks.length<2 ? cW/2 : (i/(weeks.length-1))*cW);
   const yOf = v => pT + cH - ((v-minV)/range)*cH;
@@ -1478,24 +1493,46 @@ function renderWeightChart(canvasId = 'weightChart') {
     ctx.fillText(dir, x1 - 2, y1 - 4);
   });
 
-  // Dots + dd/mm/yy x-axis labels
-  const labelStep = Math.max(1, Math.floor(weeks.length/12));
-  let lastYear = null;
+  // Detect local peaks and troughs (show weight value)
+  const minGap = 3; // min points between labelled extremes to avoid crowding
+  let lastLabelledAt = -minGap;
+  const peakTrough = avgs.map((v, i) => {
+    const prev = avgs[i-1] ?? v;
+    const next = avgs[i+1] ?? v;
+    return (v > prev && v > next) || (v < prev && v < next); // local max or min
+  });
+
+  // Dots + peak/trough value labels
   avgs.forEach((v, i) => {
-    const [year, month, day] = weeks[i].split('-');
     ctx.beginPath();
     ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
     ctx.fillStyle = '#c8ff00'; ctx.fill();
-    if (i % labelStep === 0 || i === weeks.length-1) {
-      const yy = year.slice(2);
+    if (peakTrough[i] && i - lastLabelledAt >= minGap) {
+      lastLabelledAt = i;
+      const isPeak = avgs[i] > (avgs[i-1] ?? avgs[i]);
+      ctx.fillStyle = '#c8ff00';
       ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
-      ctx.fillStyle = '#3a3a3a';
-      ctx.fillText(`${day}/${month}/${yy}`, xOf(i), H-pB+10);
+      ctx.fillText(v.toFixed(1), xOf(i), isPeak ? yOf(v) - 5 : yOf(v) + 10);
     }
-    lastYear = year;
   });
 
-  // New-year vertical dashed lines
+  // x-axis labels — show ~5 evenly spaced + last
+  const targetLabels = 5;
+  const xLabelStep = Math.max(1, Math.floor(weeks.length / targetLabels));
+  const minPixelGap = 36;
+  let lastLabelX = -minPixelGap;
+  weeks.forEach((week, i) => {
+    const x = xOf(i);
+    if ((i % xLabelStep === 0 || i === weeks.length - 1) && x - lastLabelX >= minPixelGap) {
+      const [year, month, day] = week.split('-');
+      const yy = year.slice(2);
+      ctx.fillStyle = '#3a3a3a'; ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${day}/${month}/${yy}`, x, H-pB+10);
+      lastLabelX = x;
+    }
+  });
+
+  // New-year vertical dashed lines + year label
   let prevYear = null;
   weeks.forEach((week, i) => {
     const [year, month] = week.split('-');
@@ -1504,6 +1541,8 @@ function renderWeightChart(canvasId = 'weightChart') {
       ctx.setLineDash([2, 2]);
       ctx.beginPath(); ctx.moveTo(xOf(i), pT); ctx.lineTo(xOf(i), H-pB); ctx.stroke();
       ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(200,255,0,0.5)'; ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(year, xOf(i), pT - 4);
     }
     prevYear = year;
   });
@@ -1516,15 +1555,141 @@ function renderWeightChart(canvasId = 'weightChart') {
 }
 
 // ══════════════════════════════
-//  DAY / NIGHT MODE
+//  MONTHLY WEIGHT CHART (Overview tab)
 // ══════════════════════════════
+function renderMonthlyWeightChart() {
+  const canvas = document.getElementById('monthlyWeightChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const H = 90;
+
+  // Collect monthly averages across all data
+  const monthMap = {};
+  Object.keys(calData).sort().forEach(k => {
+    const w = parseFloat(calData[k].weight);
+    if (!isNaN(w) && w > 0) {
+      const ym = k.slice(0, 7); // "YYYY-MM"
+      if (!monthMap[ym]) monthMap[ym] = [];
+      monthMap[ym].push(w);
+    }
+  });
+
+  const months = Object.keys(monthMap).sort();
+
+  if (!months.length) {
+    canvas.width = 240 * dpr; canvas.height = H * dpr;
+    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, 240, H);
+    ctx.fillStyle = '#2a2a2a';
+    ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'center';
+    ctx.fillText('No weight data logged yet', 120, H / 2);
+    return;
+  }
+
+  const avgs = months.map(m => monthMap[m].reduce((a,b)=>a+b,0)/monthMap[m].length);
+  const minV = Math.min(...avgs) - 0.8;
+  const maxV = Math.max(...avgs) + 0.8;
+  const range = maxV - minV || 1;
+
+  const pixelsPerMonth = 6;
+  const W = months.length * pixelsPerMonth + 60;
+
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const pL=32, pR=10, pT=22, pB=20;
+  const cW = W-pL-pR, cH = H-pT-pB;
+  const xOf = i => pL + (months.length < 2 ? cW/2 : (i/(months.length-1))*cW);
+  const yOf = v => pT + cH - ((v-minV)/range)*cH;
+
+  // Grid lines
+  for (let g = 0; g <= 3; g++) {
+    const gv = minV + (range/3)*g, gy = yOf(gv);
+    ctx.strokeStyle = '#1d1d1d'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(W-pR, gy); ctx.stroke();
+    ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillText(gv.toFixed(1), pL-4, gy+3);
+  }
+
+  // Area fill
+  ctx.beginPath();
+  avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
+  ctx.lineTo(xOf(avgs.length-1), H-pB); ctx.lineTo(xOf(0), H-pB); ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pT, 0, H-pB);
+  grad.addColorStop(0, 'rgba(200,255,0,0.16)'); grad.addColorStop(1, 'rgba(200,255,0,0.01)');
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle = '#c8ff00'; ctx.lineWidth = 1; ctx.lineJoin = 'round';
+  avgs.forEach((v,i) => i===0 ? ctx.moveTo(xOf(0),yOf(v)) : ctx.lineTo(xOf(i),yOf(v)));
+  ctx.stroke();
+
+  // New-year dashed lines + year label
+  let prevYear = null;
+  months.forEach((ym, i) => {
+    const year = ym.slice(0,4);
+    if (prevYear !== null && year !== prevYear) {
+      ctx.strokeStyle = '#c8ff00'; ctx.lineWidth = 0.75;
+      ctx.setLineDash([2,2]);
+      ctx.beginPath(); ctx.moveTo(xOf(i), pT); ctx.lineTo(xOf(i), H-pB); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(200,255,0,0.5)'; ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(year, xOf(i), pT - 4);
+    }
+    prevYear = year;
+  });
+
+  // Detect local peaks and troughs
+  const minGapM = 2;
+  let lastLabelledAtM = -minGapM;
+  const peakTroughM = avgs.map((v, i) => {
+    const prev = avgs[i-1] ?? v;
+    const next = avgs[i+1] ?? v;
+    return (v > prev && v > next) || (v < prev && v < next);
+  });
+
+  // Dots + peak/trough value labels
+  avgs.forEach((v, i) => {
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 1.5, 0, Math.PI*2);
+    ctx.fillStyle = '#c8ff00'; ctx.fill();
+    if (peakTroughM[i] && i - lastLabelledAtM >= minGapM) {
+      lastLabelledAtM = i;
+      const isPeak = avgs[i] > (avgs[i-1] ?? avgs[i]);
+      ctx.fillStyle = '#c8ff00';
+      ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(v.toFixed(1), xOf(i), isPeak ? yOf(v) - 5 : yOf(v) + 10);
+    }
+  });
+
+  // x-axis labels — ~5 evenly spaced with min pixel gap
+  const targetLabelsM = 5;
+  const xLabelStepM = Math.max(1, Math.floor(months.length / targetLabelsM));
+  const minPixelGapM = 32;
+  let lastLabelXM = -minPixelGapM;
+  months.forEach((ym, i) => {
+    const x = xOf(i);
+    if ((i % xLabelStepM === 0 || i === months.length - 1) && x - lastLabelXM >= minPixelGapM) {
+      const [yr, mo] = ym.split('-');
+      ctx.fillStyle = '#3a3a3a'; ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${mo}/${yr.slice(2)}`, x, H-pB+10);
+      lastLabelXM = x;
+    }
+  });
+
+  // Auto-scroll to right
+  const container = canvas.parentElement;
+  if (container && container.classList.contains('chart-scroll-container')) {
+    setTimeout(() => { container.scrollLeft = container.scrollWidth; }, 0);
+  }
+}
 function toggleMode() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('tlog_mode', isLight ? 'light' : 'dark');
   updateModeToggle(isLight);
-  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
-  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
-  if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
+  renderWeightChart();
+  if (document.getElementById('page-overview').classList.contains('active')) { renderOverview(); renderMonthlyWeightChart(); }
 }
 
 function updateModeToggle(isLight) {
@@ -2172,10 +2337,9 @@ const DEFAULT_CONFIG = {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
 window.addEventListener('resize', () => {
-  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
-  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
+  renderWeightChart();
   if (document.getElementById('page-skills').classList.contains('active')) renderSkillHistoryChart();
-  if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
+  if (document.getElementById('page-overview').classList.contains('active')) { renderOverview(); renderMonthlyWeightChart(); }
 });
 
 async function init() {
