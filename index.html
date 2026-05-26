@@ -71,13 +71,13 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     cursor: pointer;
     border: 1px solid var(--border2);
-    padding: 7px 14px;
+    padding: 6px 12px;
     transition: all 0.15s;
     user-select: none;
     background: transparent;
@@ -115,58 +115,7 @@
   /* CHART */
   .chart-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px; }
   .chart-card-title { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  #weightChart { display: block; height: 120px; }
-  #weightChartNarrow { display: block; height: 140px; }
-  
-  .chart-scroll-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Prevent touch scrolling from bubbling to parent */
-    overscroll-behavior-x: contain;
-  }
-  
-  /* Desktop: show bottom chart, hide narrow chart */
-  .cal-desktop-chart {
-    display: block;
-  }
-  
-  @media (max-width: 1199px) {
-    .cal-desktop-chart {
-      display: none;
-    }
-  }
-
-  /* Milestone star in calendar cell */
-  .day-indicators {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    display: flex;
-    gap: 3px;
-    align-items: center;
-  }
-  
-  .indicator-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  
-  .cycle-dot {
-    background: #fbbf24;
-  }
-  
-  .note-dot {
-    background: #777;
-    opacity: 0.8;
-  }
-  
-  .indicator-star {
-    font-size: 10px;
-    color: var(--accent);
-    line-height: 1;
-  }
+  #weightChart { width: 100%; height: 160px; display: block; }
 
   /* CONTROLS */
   .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -182,7 +131,7 @@
   /* CALENDAR */
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
   .day-header { text-align: center; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding: 4px 0 6px; }
-  .day-cell { background: var(--surface); border: 1px solid var(--border); min-height: 72px; padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: border-color 0.12s; cursor: pointer; position: relative; }
+  .day-cell { background: var(--surface); border: 1px solid var(--border); min-height: 72px; padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: border-color 0.12s; cursor: pointer; }
   .day-cell:hover { border-color: var(--border2); }
   .day-cell.empty { background: transparent; border-color: transparent; pointer-events: none; }
   .day-cell.today { border-color: var(--accent); background: #0f120a; }
@@ -352,98 +301,33 @@
     .level-ref-table td:first-child { font-size: 15px; }
   }
 
-  /* ── MILESTONES PAGE ── */
-  .milestones-table {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    width: 100%;
-  }
-  .milestones-table th {
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: left;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    font-weight: 400;
-  }
-  .milestones-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-    line-height: 1.6;
-  }
-  .milestones-table tr:last-child td {
-    border-bottom: none;
-  }
-  .milestones-table tr:hover {
-    background: var(--surface2);
-  }
-  .milestone-date {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    letter-spacing: 0.06em;
-    color: var(--accent);
-    white-space: nowrap;
-    min-width: 100px;
-  }
-  .milestone-text {
-    color: var(--text);
-  }
-  .no-milestones {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-  }
-  
-  #overviewWeightLineChart {
-    width: 100%;
-    height: 180px;
-    display: block;
-  }
-
   /* ── OVERVIEW PAGE ── */
-  .overview-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .overview-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
   .overview-year-label { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.06em; color: var(--text); min-width: 80px; text-align: center; line-height: 1; }
-  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .month-summary-card {
+  .overview-chart-wrap {
     background: var(--surface); border: 1px solid var(--border);
-    padding: 14px 16px; cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-    display: flex; flex-direction: column; gap: 6px;
+    padding: 20px 16px 14px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .month-summary-card:hover { border-color: var(--accent); background: #0f120a; }
-  .month-summary-card.empty-month { cursor: default; opacity: 0.4; }
-  .month-summary-card.empty-month:hover { border-color: var(--border); background: var(--surface); }
-  .month-summary-card.current-month { border-color: var(--accent); }
-  .mscard-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.07em; color: var(--text); line-height: 1; }
-  .mscard-weight { font-size: 20px; font-family: 'Bebas Neue', sans-serif; color: var(--accent); letter-spacing: 0.04em; line-height: 1.1; }
-  .mscard-weight-label { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-  .mscard-workouts { font-size: 10px; color: var(--accent); font-weight: 600; letter-spacing: 0.04em; margin-top: 2px; }
-  .mscard-milestone { font-size: 9px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; border-top: 1px solid #1e1e1e; padding-top: 5px; }
-  .mscard-arrow { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; padding-top: 6px; transition: color 0.12s; }
-  .month-summary-card:hover .mscard-arrow { color: var(--accent); }
-
-  /* heatmap bars */
-  .mscard-bars { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-  .mscard-bar-row { display: flex; align-items: center; gap: 6px; }
-  .mscard-bar-label { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); width: 22px; flex-shrink: 0; }
-  .mscard-bar-track { flex: 1; height: 5px; background: #1e1e1e; overflow: hidden; }
-  .mscard-bar-fill { height: 100%; transition: width 0.4s ease; }
-  .mscard-bar-fill.workouts-fill { background: linear-gradient(90deg, #2d6a2d, #c8ff00); }
-  .mscard-bar-fill.weight-fill   { background: linear-gradient(90deg, #1a3a5c, #ff7043); }
+  #overviewCanvas { display: block; }
+  .overview-legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .overview-legend-item {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .overview-legend-swatch { width: 22px; height: 8px; }
+  .overview-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
 
   @media (max-width: 600px) {
-    .overview-grid { grid-template-columns: repeat(2, 1fr); gap: 7px; }
     .overview-year-label { font-size: 28px; }
-    .mscard-name { font-size: 15px; }
-    .mscard-weight { font-size: 18px; }
-  }
-  @media (max-width: 360px) {
-    .overview-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+    .overview-chart-wrap { padding: 14px 10px 10px; }
   }
 
   /* ── PASSWORD GATE ── */
@@ -558,7 +442,7 @@
 
     /* chart */
     .chart-card { padding: 12px 12px; }
-    #weightChartNarrow { height: 130px; }
+    #weightChart { height: 130px; }
 
     /* skills page */
     .skills-grid { grid-template-columns: 1fr; gap: 10px; }
@@ -611,7 +495,6 @@
   <button class="nav-tab active" onclick="showPage('calendar', this)">Calendar</button>
   <button class="nav-tab" onclick="showPage('overview', this)">Overview</button>
   <button class="nav-tab" onclick="showPage('skills', this)">Skills</button>
-  <button class="nav-tab" onclick="showPage('milestones', this)">Milestones</button>
 </nav>
 
 <!-- CALENDAR PAGE -->
@@ -671,9 +554,6 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;border-radius:50%;width:7px;height:7px"></div>Cycle Commute</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8;border-radius:50%;width:7px;height:7px"></div>Notes</div>
-        <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
       </div>
 
       <div class="page-footer cal-sidebar-footer">
@@ -696,14 +576,6 @@
     </div>
   </div>
 
-  <!-- Weight Chart - Desktop Bottom Position -->
-  <div class="chart-card cal-desktop-chart" style="margin-top:20px">
-    <div class="chart-card-title">Weekly Avg Weight (kg)</div>
-    <div class="chart-scroll-container">
-      <canvas id="weightChart"></canvas>
-    </div>
-  </div>
-
   <!-- Shown only on narrow screens (hidden at ≥1200px via CSS) -->
   <div class="cal-narrow-below">
     <div class="legend" style="flex-direction:column;gap:6px">
@@ -711,19 +583,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-hp)"></div>Horizontal: Planche Push &amp; Front Lever</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg)"></div>Legs: Pistol Squat &amp; Nordic Curls</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-vc)"></div>Handstands &amp; Crows</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;border-radius:50%;width:7px;height:7px"></div>Cycle Commute</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#777;opacity:0.8;border-radius:50%;width:7px;height:7px"></div>Notes</div>
-      <div class="legend-item"><span style="font-size:10px;color:var(--accent);line-height:1;margin-right:4px">★</span>Milestone</div>
     </div>
-
-    <!-- Weight Chart Below Legend on Narrow Screens -->
-    <div class="chart-card" style="margin-top:16px;padding:12px 14px">
-      <div class="chart-card-title">Weekly Avg Weight (kg)</div>
-      <div class="chart-scroll-container">
-        <canvas id="weightChartNarrow"></canvas>
-      </div>
-    </div>
-
     <div class="page-footer">
       <div class="footer-group">
         <span class="footer-label">Export</span>
@@ -752,7 +612,14 @@
     <div class="overview-year-label" id="overviewYearLabel"></div>
     <button class="nav-btn" onclick="changeOverviewYear(1)">›</button>
   </div>
-  <div class="overview-grid" id="overviewGrid"></div>
+  <div class="overview-chart-wrap">
+    <canvas id="overviewCanvas"></canvas>
+  </div>
+  <div class="overview-legend" id="overviewLegend"></div>
+  <div class="chart-card" style="margin-top:22px">
+    <div class="chart-card-title">Weekly Average Weight (kg)</div>
+    <canvas id="weightChart"></canvas>
+  </div>
 </div>
 
 <!-- SKILLS PAGE -->
@@ -770,13 +637,6 @@
     <div class="level-ref-title">Level Reference Guide</div>
     <div style="overflow-x:auto" id="levelRefTableWrap"></div>
   </div>
-</div>
-
-<!-- MILESTONES PAGE -->
-<div class="page" id="page-milestones">
-  <div class="page-title">Milestones</div>
-  <div class="skills-intro">A record of your significant achievements and breakthroughs.</div>
-  <div id="milestonesTable"></div>
 </div>
 
 <!-- MODAL -->
@@ -801,10 +661,6 @@
     <div id="modalNotesSection">
     <div class="modal-label">Notes</div>
     <textarea id="modalNotes" placeholder="How did it feel? PRs, fatigue, anything worth noting..."></textarea>
-    </div>
-    <div id="modalMilestoneSection">
-    <div class="modal-label">Milestone</div>
-    <textarea id="modalMilestone" placeholder="Record a significant achievement (e.g., 'First unassisted HSPU', 'Hit 70kg bodyweight')..." style="min-height:50px"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -1053,9 +909,8 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'skills')     renderSkillsPage();
-  if (id === 'overview')   renderOverview();
-  if (id === 'milestones') renderMilestones();
+  if (id === 'skills')   renderSkillsPage();
+  if (id === 'overview') renderOverview();
 }
 
 // ══════════════════════════════
@@ -1071,415 +926,226 @@ function changeOverviewYear(dir) {
 function renderOverview() {
   document.getElementById('overviewYearLabel').textContent = overviewYear;
 
-  const MONTHS = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const today = new Date();
-  const grid  = document.getElementById('overviewGrid');
-  grid.innerHTML = '';
 
-  // For milestone detection
-  const allSkillHistory = {};
-  SKILLS.forEach(sk => {
-    allSkillHistory[sk.id] = (skillData[sk.id]?.history || [])
-      .slice().sort((a,b) => a.date.localeCompare(b.date));
-  });
-
-  // ── First pass: gather all 12 months' raw values for normalisation ──
+  // ── Gather data for all 12 months ──
   const monthData = [];
   for (let m = 0; m < 12; m++) {
     const prefix    = `${overviewYear}-${String(m+1).padStart(2,'0')}`;
+    const monthEnd  = `${prefix}-31`;
     const monthKeys = Object.keys(calData).filter(k => k.startsWith(prefix));
     const weights   = monthKeys.map(k => parseFloat(calData[k].weight)).filter(w => !isNaN(w) && w > 0);
-    const avgWeight    = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
-    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w && w !== 'cycle').length), 0);
+    const avgWeight = weights.length ? weights.reduce((a,b)=>a+b,0)/weights.length : null;
+    const workoutCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w && w!=='cycle').length), 0);
+    const cycleCount   = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w==='cycle').length), 0);
 
-    const milestones = [];
+    // Skill sum: sum of current levels at end of this month
+    let skillSum = 0;
     SKILLS.forEach(sk => {
-      const hist = allSkillHistory[sk.id];
-      if (!hist.length) return;
-      const monthStart = `${overviewYear}-${String(m+1).padStart(2,'0')}-01`;
-      const monthEnd   = `${overviewYear}-${String(m+1).padStart(2,'0')}-31`;
-      const prevBest = hist.filter(h => h.date < monthStart).reduce((max,h) => Math.max(max,h.level), 0);
-      const thisMonthBest = hist.filter(h => h.date >= monthStart && h.date <= monthEnd).reduce((max,h) => Math.max(max,h.level), 0);
-      if (thisMonthBest > prevBest && thisMonthBest > 0) milestones.push(`${sk.name} → L${thisMonthBest}`);
+      const hist = (skillData[sk.id]?.history || [])
+        .filter(h => h.date <= monthEnd)
+        .sort((a,b) => a.date.localeCompare(b.date));
+      if (hist.length) skillSum += hist[hist.length-1].level;
     });
 
-    const cycleCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w => w === 'cycle').length), 0);
-    monthData.push({ avgWeight, workoutCount, cycleCount, milestones });
+    monthData.push({ avgWeight, workoutCount, cycleCount, skillSum });
   }
 
-  // ── Normalise across the year (past months only) ──
-  const pastAvgWeights   = monthData.map(d => d.avgWeight).filter(v => v !== null);
-  const pastWorkouts = monthData.map(d => d.workoutCount).filter(v => v > 0);
+  // ── Max values for scaling ──
+  const maxTotal = Math.max(1, ...monthData.map(d => d.workoutCount + d.cycleCount));
+  const allWeights = monthData.map(d => d.avgWeight).filter(v => v !== null);
+  const minW = allWeights.length ? Math.min(...allWeights) - 1.5 : 60;
+  const maxW = allWeights.length ? Math.max(...allWeights) + 1.5 : 80;
 
-  // Weight: use a narrow band (minW-0.5 to maxW+0.5) so variation is visible
-  const minW = pastAvgWeights.length ? Math.min(...pastAvgWeights) : 0;
-  const maxW = pastAvgWeights.length ? Math.max(...pastAvgWeights) : 1;
-  const weightRange = Math.max(maxW - minW, 0.5); // ensure non-zero
+  // ── Canvas setup ──
+  const canvas = document.getElementById('overviewCanvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const colW   = 52;   // px per month column
+  const pL     = 44;   // left axis padding (for weight scale)
+  const pR     = 10;
+  const pT     = 60;   // top padding for weight overlay labels
+  const pB     = 46;   // bottom padding for skill sum + month labels
+  const barH   = 220;  // height of the bar chart area
+  const totalH = pT + barH + pB;
+  const totalW = pL + 12 * colW + pR;
 
-  const maxWorkouts = pastWorkouts.length ? Math.max(...pastWorkouts) : 1;
+  canvas.style.width  = totalW + 'px';
+  canvas.style.height = totalH + 'px';
+  canvas.width  = totalW * dpr;
+  canvas.height = totalH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, totalW, totalH);
 
-  // ── Second pass: render cards ──
-  for (let m = 0; m < 12; m++) {
-    const { avgWeight, workoutCount, cycleCount, milestones } = monthData[m];
-    const isEmpty   = !avgWeight && workoutCount === 0 && cycleCount === 0 && milestones.length === 0;
-    const isCurrent = overviewYear === today.getFullYear() && m === today.getMonth();
+  const isLight = document.body.classList.contains('light');
+  const colText  = isLight ? '#1a1a1a' : '#e0e0e0';
+  const mutedCol = isLight ? '#888' : '#555';
+  const gridCol  = isLight ? '#e0e0e0' : '#1e1e1e';
+  const surfaceCol = isLight ? '#f4f4f0' : '#0a0a0a';
+
+  // ── Grid lines (bar area) ──
+  for (let g = 0; g <= 4; g++) {
+    const gy = pT + barH - (g / 4) * barH;
+    ctx.strokeStyle = gridCol; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(pL + 12 * colW, gy); ctx.stroke();
+    // left axis labels (workout count)
+    const val = Math.round((g / 4) * maxTotal);
+    ctx.fillStyle = mutedCol; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillText(val, pL - 5, gy + 3);
+  }
+
+  // ── Draw bars + labels ──
+  monthData.forEach((d, m) => {
     const isFuture  = new Date(overviewYear, m, 1) > today;
+    const isCurrent = overviewYear === today.getFullYear() && m === today.getMonth();
+    const cx = pL + m * colW + colW / 2;  // centre x of this month
 
-    const card = document.createElement('div');
-    card.className = 'month-summary-card'
-      + (isEmpty || isFuture ? ' empty-month' : '')
-      + (isCurrent ? ' current-month' : '');
+    if (isFuture) {
+      // faint month label only
+      ctx.fillStyle = mutedCol + '44';
+      ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(MONTHS_SHORT[m], cx, pT + barH + 14);
+      return;
+    }
 
-    // Month name
-    const nameEl = document.createElement('div');
-    nameEl.className = 'mscard-name';
-    nameEl.textContent = MONTHS[m];
-    card.appendChild(nameEl);
+    const workoutH = barH * (d.workoutCount / maxTotal);
+    const cycleH   = barH * (d.cycleCount   / maxTotal);
+    const totalBarH = workoutH + cycleH;
+    const barW  = colW * 0.62;
+    const barX  = cx - barW / 2;
 
-    if (!isFuture) {
-      // Weight value + change annotation
-      const wRow = document.createElement('div');
-      wRow.style.cssText = 'display:flex;align-items:baseline;gap:6px';
+    // Workout bar (bottom, yellow-green)
+    if (d.workoutCount > 0) {
+      const gy0 = pT + barH;
+      ctx.fillStyle = isCurrent ? 'rgba(200,255,0,0.85)' : 'rgba(200,255,0,0.55)';
+      ctx.fillRect(barX, gy0 - workoutH, barW, workoutH);
 
-      const wEl = document.createElement('div');
-      wEl.className = 'mscard-weight';
-      wEl.textContent = avgWeight ? avgWeight.toFixed(1) + ' kg' : '—';
-      wRow.appendChild(wEl);
-
-      // Weight change vs previous month with data
-      if (avgWeight !== null) {
-        let prevAvg = null;
-        for (let pm = m - 1; pm >= 0; pm--) {
-          if (monthData[pm]?.avgWeight !== null && monthData[pm]?.avgWeight !== undefined) {
-            prevAvg = monthData[pm].avgWeight; break;
-          }
-        }
-        if (prevAvg !== null) {
-          const delta = avgWeight - prevAvg;
-          if (Math.abs(delta) >= 0.5) {
-            const annEl = document.createElement('div');
-            annEl.style.cssText = `font-size:10px;font-weight:600;color:${delta > 0 ? '#ff7043' : '#4fc3f7'};letter-spacing:0.04em;line-height:1`;
-            annEl.textContent = (delta > 0 ? '▲' : '▼') + Math.abs(delta).toFixed(1);
-            wRow.appendChild(annEl);
-          }
-        }
-      }
-      card.appendChild(wRow);
-
-      const wLbl = document.createElement('div');
-      wLbl.className = 'mscard-weight-label';
-      wLbl.textContent = 'avg weight';
-      card.appendChild(wLbl);
-
-      // Cycle count (now first)
-      const cyEl = document.createElement('div');
-      cyEl.style.cssText = 'font-size:10px;color:#fbbf24;letter-spacing:0.06em;margin-top:1px;font-weight:600';
-      if (cycleCount > 0) {
-        cyEl.textContent = `${cycleCount} cycle commute${cycleCount !== 1 ? 's' : ''}`;
-      } else {
-        cyEl.textContent = 'No cycles logged';
-        cyEl.style.fontWeight = '400';
-        cyEl.style.color = '#fbbf24';
-      }
-      card.appendChild(cyEl);
-
-      // Workout count (now second)
-      const woEl = document.createElement('div');
-      woEl.className = 'mscard-workouts';
-      woEl.style.marginTop = '1px';
-      if (workoutCount) {
-        woEl.textContent = `${workoutCount} workout${workoutCount !== 1 ? 's' : ''}`;
-      } else {
-        woEl.textContent = 'No workouts logged';
-        woEl.style.fontWeight = '400';
-        woEl.style.color = 'var(--accent)';
-      }
-      card.appendChild(woEl);
-
-      // Skills dots + milestone star on same row
-      const skillsRow = document.createElement('div');
-      skillsRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;align-items:center';
-      const monthEnd = `${overviewYear}-${String(m+1).padStart(2,'0')}-31`;
-      let anySkill = false;
-      SKILLS.forEach(sk => {
-        const hist = (skillData[sk.id]?.history || [])
-          .filter(h => h.date <= monthEnd)
-          .sort((a,b) => a.date.localeCompare(b.date));
-        if (!hist.length) return;
-        const levelThen = hist[hist.length-1].level;
-        anySkill = true;
-        const dot = document.createElement('div');
-        dot.title = `${sk.name}: L${levelThen}`;
-        dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${sk.color};opacity:${0.3 + (levelThen/7)*0.7};flex-shrink:0`;
-        skillsRow.appendChild(dot);
-      });
-      if (milestones.length) {
-        const starEl = document.createElement('span');
-        starEl.title = milestones.join(', ');
-        starEl.style.cssText = 'font-size:10px;color:var(--accent);line-height:1;margin-left:6px';
-        starEl.textContent = '★';
-        skillsRow.appendChild(starEl);
-        anySkill = true;
-      }
-      if (anySkill) card.appendChild(skillsRow);
-
-      // ── Heatmap bars ──
-      if (!isEmpty) {
-        const barsEl = document.createElement('div');
-        barsEl.className = 'mscard-bars';
-
-        // Workouts bar (green gradient)
-        const woPct = maxWorkouts > 0 ? Math.round((workoutCount / maxWorkouts) * 100) : 0;
-        barsEl.innerHTML += `
-          <div class="mscard-bar-row">
-            <div class="mscard-bar-label">WO</div>
-            <div class="mscard-bar-track">
-              <div class="mscard-bar-fill workouts-fill" style="width:${woPct}%"></div>
-            </div>
-          </div>`;
-
-        // Weight bar (blue→orange gradient)
-        const wtPct = avgWeight !== null
-          ? Math.round(Math.min(((avgWeight - minW) / weightRange) * 100, 100))
-          : 0;
-        barsEl.innerHTML += `
-          <div class="mscard-bar-row">
-            <div class="mscard-bar-label">WT</div>
-            <div class="mscard-bar-track">
-              <div class="mscard-bar-fill weight-fill" style="width:${avgWeight !== null ? Math.max(wtPct, 8) : 0}%"></div>
-            </div>
-          </div>`;
-
-        card.appendChild(barsEl);
-      }
-
-      // Tap arrow
-      if (!isEmpty) {
-        const arrEl = document.createElement('div');
-        arrEl.className = 'mscard-arrow';
-        arrEl.textContent = 'Open month →';
-        card.appendChild(arrEl);
-
-        card.addEventListener('click', () => {
-          cy = overviewYear; cm = m;
-          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-          document.getElementById('page-calendar').classList.add('active');
-          document.querySelector('.nav-tab').classList.add('active');
-          renderCalendar();
-          window.scrollTo(0, 0);
-        });
+      // workout count label centred in workout segment
+      if (workoutH > 14) {
+        ctx.fillStyle = isLight ? '#0a0a0a' : '#0a0a0a';
+        ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
+        ctx.fillText(d.workoutCount, cx, gy0 - workoutH / 2 + 3.5);
       }
     }
 
-    grid.appendChild(card);
+    // Cycle bar (on top, orange)
+    if (d.cycleCount > 0) {
+      const cy0 = pT + barH - workoutH;
+      ctx.fillStyle = isCurrent ? 'rgba(251,191,36,0.9)' : 'rgba(251,191,36,0.65)';
+      ctx.fillRect(barX, cy0 - cycleH, barW, cycleH);
+
+      // cycle count label centred in cycle segment
+      if (cycleH > 14) {
+        ctx.fillStyle = '#0a0a0a';
+        ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
+        ctx.fillText(d.cycleCount, cx, cy0 - cycleH / 2 + 3.5);
+      }
+    }
+
+    // Current month marker: subtle accent border
+    if (isCurrent && totalBarH > 0) {
+      ctx.strokeStyle = '#c8ff00';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(barX, pT + barH - totalBarH, barW, totalBarH);
+    }
+
+    // Month label
+    ctx.fillStyle = isCurrent ? '#c8ff00' : colText;
+    ctx.font = (isCurrent ? "500 " : "") + "9px 'DM Mono',monospace";
+    ctx.textAlign = 'center';
+    ctx.fillText(MONTHS_SHORT[m], cx, pT + barH + 14);
+
+    // Skill sum at the very base (below month label)
+    if (d.skillSum > 0) {
+      ctx.fillStyle = mutedCol;
+      ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText('sk:' + d.skillSum, cx, pT + barH + 28);
+    }
+  });
+
+  // ── Weight overlay line ──
+  const weightPoints = [];
+  monthData.forEach((d, m) => {
+    if (d.avgWeight === null) return;
+    const isFuture = new Date(overviewYear, m, 1) > today;
+    if (isFuture) return;
+    const cx = pL + m * colW + colW / 2;
+    const wRange = maxW - minW || 1;
+    // map weight to top area: weight line floats in pT zone (y from 6 to pT-6)
+    const wy = pT - 6 - ((d.avgWeight - minW) / wRange) * (pT - 18);
+    weightPoints.push({ m, cx, wy, avgWeight: d.avgWeight });
+  });
+
+  if (weightPoints.length > 1) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,171,145,0.85)';
+    ctx.lineWidth = 2; ctx.lineJoin = 'round';
+    weightPoints.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.cx, p.wy); else ctx.lineTo(p.cx, p.wy);
+    });
+    ctx.stroke();
+  }
+
+  // Dots + weight labels
+  weightPoints.forEach((p, i) => {
+    // Dot
+    ctx.beginPath();
+    ctx.arc(p.cx, p.wy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffab91'; ctx.fill();
+
+    // Weight value above dot
+    ctx.fillStyle = '#ffab91';
+    ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
+    ctx.fillText(p.avgWeight.toFixed(1), p.cx, p.wy - 7);
+
+    // Delta indicator vs previous month with data
+    if (i > 0) {
+      const prev = weightPoints[i - 1];
+      const delta = p.avgWeight - prev.avgWeight;
+      if (Math.abs(delta) >= 0.3) {
+        const arrow = delta > 0 ? '▲' : '▼';
+        const col   = delta > 0 ? '#ff7043' : '#4fc3f7';
+        ctx.fillStyle = col;
+        ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'center';
+        ctx.fillText(arrow + Math.abs(delta).toFixed(1), p.cx, p.wy - 17);
+      }
+    }
+  });
+
+  // ── Weight axis (right side label) ──
+  if (weightPoints.length) {
+    const wRange = maxW - minW || 1;
+    [minW + 1, (minW + maxW) / 2, maxW - 1].forEach(wv => {
+      const wy = pT - 6 - ((wv - minW) / wRange) * (pT - 18);
+      ctx.fillStyle = 'rgba(255,171,145,0.45)';
+      ctx.font = "7px 'DM Mono',monospace"; ctx.textAlign = 'right';
+      ctx.fillText(wv.toFixed(0) + 'kg', pL - 5, wy + 2.5);
+    });
   }
 
   // ── Legend ──
-  let legend = document.getElementById('overviewLegend');
-  if (!legend) {
-    legend = document.createElement('div');
-    legend.id = 'overviewLegend';
-    legend.style.cssText = 'display:flex;gap:20px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)';
-    document.getElementById('page-overview').appendChild(legend);
-  }
+  const legend = document.getElementById('overviewLegend');
   legend.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
-      <div style="width:32px;height:5px;background:linear-gradient(90deg,#2d6a2d,#c8ff00)"></div>
-      Workouts (0 → ${maxWorkouts})
+    <div class="overview-legend-item">
+      <div class="overview-legend-swatch" style="background:rgba(200,255,0,0.55)"></div>
+      Workouts
     </div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
-      <div style="width:32px;height:5px;background:linear-gradient(90deg,#1a3a5c,#ff7043)"></div>
-      Weight (${minW.toFixed(1)} → ${maxW.toFixed(1)} kg)
+    <div class="overview-legend-item">
+      <div class="overview-legend-swatch" style="background:rgba(251,191,36,0.65)"></div>
+      Cycle commutes
+    </div>
+    <div class="overview-legend-item">
+      <div class="overview-legend-dot" style="background:#ffab91"></div>
+      Avg weight (kg)
+    </div>
+    <div class="overview-legend-item" style="color:${mutedCol}">
+      sk: sum of skill levels
     </div>`;
 
-  // ── Monthly Average Weight Chart ──
-  renderMonthlyWeightChart();
-}
-
-function renderMonthlyWeightChart() {
-  let chartCard = document.getElementById('overviewMonthlyWeightChart');
-  if (!chartCard) {
-    chartCard = document.createElement('div');
-    chartCard.id = 'overviewMonthlyWeightChart';
-    chartCard.className = 'chart-card';
-    chartCard.style.marginTop = '22px';
-    chartCard.innerHTML = '<div class="chart-card-title">Monthly Average Weight History</div><canvas id="overviewWeightLineChart"></canvas>';
-    document.getElementById('page-overview').appendChild(chartCard);
-  }
-
-  const canvas = document.getElementById('overviewWeightLineChart');
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  
-  // Calculate monthly averages for ALL months in the dataset
-  const monthlyData = {};
-  Object.keys(calData).sort().forEach(date => {
-    const w = parseFloat(calData[date].weight);
-    if (!isNaN(w) && w > 0) {
-      const monthKey = date.slice(0, 7); // YYYY-MM
-      if (!monthlyData[monthKey]) monthlyData[monthKey] = [];
-      monthlyData[monthKey].push(w);
-    }
-  });
-
-  // Convert to array of {month, avgWeight}
-  const dataPoints = Object.keys(monthlyData).sort().map(monthKey => {
-    const weights = monthlyData[monthKey];
-    const avgWeight = weights.reduce((a,b)=>a+b,0) / weights.length;
-    return { month: monthKey, weight: avgWeight };
-  });
-
-  if (dataPoints.length === 0) {
-    canvas.width = 600 * dpr;
-    canvas.height = 180 * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, 600, 180);
-    ctx.fillStyle = '#2a2a2a';
-    ctx.font = "11px 'DM Mono',monospace";
-    ctx.textAlign = 'center';
-    ctx.fillText('No weight data recorded', 300, 90);
-    return;
-  }
-
-  // Use full window width (minus padding)
-  const W = canvas.offsetWidth || 600;
-  const H = 180;
-  
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, W, H);
-
-  const weights = dataPoints.map(p => p.weight);
-  const minV = Math.min(...weights) - 0.8;
-  const maxV = Math.max(...weights) + 0.8;
-  const range = maxV - minV || 1;
-  
-  const pL = 42, pR = 14, pT = 20, pB = 26;
-  const cW = W - pL - pR;
-  const cH = H - pT - pB;
-  
-  const xOf = i => pL + (dataPoints.length < 2 ? cW/2 : (i/(dataPoints.length-1)) * cW);
-  const yOf = v => pT + cH - ((v - minV) / range) * cH;
-
-  // Grid lines
-  for (let g = 0; g <= 3; g++) {
-    const gv = minV + (range/3)*g;
-    const gy = yOf(gv);
-    ctx.strokeStyle = '#1d1d1d';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pL, gy);
-    ctx.lineTo(W-pR, gy);
-    ctx.stroke();
-    ctx.fillStyle = '#3a3a3a';
-    ctx.font = "9px 'DM Mono',monospace";
-    ctx.textAlign = 'right';
-    ctx.fillText(gv.toFixed(1), pL-4, gy+3);
-  }
-
-  // Area fill
-  ctx.beginPath();
-  dataPoints.forEach((p, i) => {
-    if (i === 0) ctx.moveTo(xOf(i), yOf(p.weight));
-    else ctx.lineTo(xOf(i), yOf(p.weight));
-  });
-  ctx.lineTo(xOf(dataPoints.length-1), H-pB);
-  ctx.lineTo(xOf(0), H-pB);
-  ctx.closePath();
-  
-  const grad = ctx.createLinearGradient(0, pT, 0, H-pB);
-  grad.addColorStop(0, 'rgba(200,255,0,0.16)');
-  grad.addColorStop(1, 'rgba(200,255,0,0.01)');
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Data line
-  ctx.beginPath();
-  ctx.strokeStyle = '#c8ff00';
-  ctx.lineWidth = 1.5;
-  ctx.lineJoin = 'round';
-  dataPoints.forEach((p, i) => {
-    if (i === 0) ctx.moveTo(xOf(i), yOf(p.weight));
-    else ctx.lineTo(xOf(i), yOf(p.weight));
-  });
-  ctx.stroke();
-
-  // Per-year trend lines
-  const yearGroups = {};
-  dataPoints.forEach((p, i) => {
-    const yr = p.month.slice(0, 4);
-    if (!yearGroups[yr]) yearGroups[yr] = [];
-    yearGroups[yr].push({ i, v: p.weight });
-  });
-
-  Object.values(yearGroups).forEach(pts => {
-    if (pts.length < 2) return;
-    const n = pts.length;
-    const xs = pts.map((_, j) => j);
-    const ys = pts.map(p => p.v);
-    const meanX = xs.reduce((a,b)=>a+b,0)/n;
-    const meanY = ys.reduce((a,b)=>a+b,0)/n;
-    const ssXX = xs.reduce((s,x)=>s+(x-meanX)**2,0);
-    const ssXY = xs.reduce((s,x,j)=>s+(x-meanX)*(ys[j]-meanY),0);
-    const slope = ssXX === 0 ? 0 : ssXY/ssXX;
-    const intercept = meanY - slope*meanX;
-
-    const x0 = xOf(pts[0].i);
-    const y0 = yOf(intercept);
-    const x1 = xOf(pts[n-1].i);
-    const y1 = yOf(slope*(n-1)+intercept);
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.moveTo(x0, y0);
-    ctx.lineTo(x1, y1);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    const dir = slope > 0.05 ? '▲' : slope < -0.05 ? '▼' : '—';
-    const col = slope > 0.05 ? '#ff7043' : slope < -0.05 ? '#4fc3f7' : '#555';
-    ctx.fillStyle = col;
-    ctx.font = "8px 'DM Mono',monospace";
-    ctx.textAlign = 'right';
-    ctx.fillText(dir, x1 - 2, y1 - 5);
-  });
-
-  // Data points
-  dataPoints.forEach((p, i) => {
-    ctx.beginPath();
-    ctx.arc(xOf(i), yOf(p.weight), 2.5, 0, Math.PI*2);
-    ctx.fillStyle = '#c8ff00';
-    ctx.fill();
-  });
-
-  // X-axis labels - show month/year at intervals with year highlighting
-  const labelStep = Math.max(1, Math.floor(dataPoints.length / 10));
-  let lastYear = null;
-  
-  dataPoints.forEach((p, i) => {
-    if (i % labelStep === 0 || i === dataPoints.length - 1) {
-      const [year, month] = p.month.split('-');
-      const isNewYear = lastYear !== null && year !== lastYear;
-      lastYear = year;
-      
-      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const monthLabel = monthNames[parseInt(month) - 1];
-      const yy = year.slice(2);
-      const dateLabel = `${monthLabel} '${yy}`;
-      
-      ctx.font = "8px 'DM Mono',monospace";
-      ctx.textAlign = 'center';
-      ctx.fillStyle = isNewYear ? '#c8ff00' : '#3a3a3a';
-      ctx.fillText(dateLabel, xOf(i), H-pB+12);
-    }
-  });
+  // weight chart
+  renderWeightChart();
 }
 
 // ══════════════════════════════
@@ -1539,8 +1205,6 @@ function renderCalendar() {
       const br = document.createElement('div');
       br.className = 'badges-row';
       workouts.forEach(exv => {
-        // Skip cycle - it will be shown as a dot in top right
-        if (exv === 'cycle') return;
         const cfg = EX[exv];
         if (cfg && cfg.badge) {
           const b = document.createElement('span');
@@ -1551,41 +1215,15 @@ function renderCalendar() {
           br.appendChild(b);
         }
       });
-      if (br.children.length > 0) cell.appendChild(br);
+      cell.appendChild(br);
     }
 
-    // Top right indicators container
-    const indicators = document.createElement('div');
-    indicators.className = 'day-indicators';
-    
-    // Cycle dot (amber)
-    const hasCycle = (rec.workouts || []).includes('cycle');
-    if (hasCycle) {
-      const cycleDot = document.createElement('div');
-      cycleDot.className = 'indicator-dot cycle-dot';
-      cycleDot.title = 'Cycle commute';
-      indicators.appendChild(cycleDot);
-    }
-    
-    // Note dot (grey)
     if (rec.notes) {
-      const noteDot = document.createElement('div');
-      noteDot.className = 'indicator-dot note-dot';
-      noteDot.title = rec.notes;
-      indicators.appendChild(noteDot);
-    }
-
-    // Milestone star
-    if (rec.milestone) {
-      const star = document.createElement('div');
-      star.className = 'indicator-star';
-      star.textContent = '★';
-      star.title = rec.milestone;
-      indicators.appendChild(star);
-    }
-    
-    if (indicators.children.length > 0) {
-      cell.appendChild(indicators);
+      const ni = document.createElement('div');
+      ni.title = rec.notes;
+      ni.style.cssText = 'margin-top:auto;display:flex;align-items:center;gap:3px;padding-top:2px';
+      ni.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:#777;flex-shrink:0;display:inline-block;opacity:0.8"></span><span style="font-size:8px;color:#777;opacity:0.7;letter-spacing:0.04em;line-height:1">note</span>';
+      cell.appendChild(ni);
     }
 
     cell.addEventListener('click', () => openModal(k));
@@ -1594,10 +1232,6 @@ function renderCalendar() {
 
   updateStats();
   updateTodayBtn();
-  
-  // Render weight charts for both desktop and mobile
-  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
-  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
 }
 
 // ══════════════════════════════
@@ -1640,65 +1274,19 @@ function logWeightToday() {
 }
 
 // ══════════════════════════════
-//  MILESTONES PAGE
-// ══════════════════════════════
-function renderMilestones() {
-  const container = document.getElementById('milestonesTable');
-  if (!container) return;
-
-  // Collect all milestones from calData
-  const milestones = [];
-  Object.keys(calData).forEach(date => {
-    if (calData[date].milestone) {
-      milestones.push({
-        date: date,
-        text: calData[date].milestone
-      });
-    }
-  });
-
-  // Sort by date descending (most recent first)
-  milestones.sort((a, b) => b.date.localeCompare(a.date));
-
-  if (milestones.length === 0) {
-    container.innerHTML = '<div class="no-milestones">No milestones recorded yet. Click any day on the calendar to add your first achievement!</div>';
-    return;
-  }
-
-  let html = '<table class="milestones-table"><thead><tr><th>Date</th><th>Milestone</th></tr></thead><tbody>';
-  milestones.forEach(m => {
-    html += `<tr onclick="goToMilestoneDate('${m.date}')" style="cursor:pointer">
-      <td class="milestone-date">${prettyDate(m.date)}</td>
-      <td class="milestone-text">${m.text}</td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  container.innerHTML = html;
-}
-
-function goToMilestoneDate(dateStr) {
-  const [y, m, d] = dateStr.split('-');
-  cy = parseInt(y);
-  cm = parseInt(m) - 1;
-  
-  // Switch to calendar tab
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-calendar').classList.add('active');
-  document.querySelector('.nav-tab').classList.add('active');
-  
-  renderCalendar();
-  window.scrollTo(0, 0);
-}
-
-// ══════════════════════════════
 //  WEIGHT CHART (with trend line)
 // ══════════════════════════════
-function renderWeightChart(canvasId = 'weightChart') {
-  const canvas = document.getElementById(canvasId);
+function renderWeightChart() {
+  const canvas = document.getElementById('weightChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 600;
+  const H = 160;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
 
   const weekMap = {};
   Object.keys(calData).sort().forEach(k => {
@@ -1712,35 +1300,18 @@ function renderWeightChart(canvasId = 'weightChart') {
 
   const weeks = Object.keys(weekMap).sort();
   if (!weeks.length) {
-    const H = canvasId === 'weightChart' ? 120 : 140;
-    canvas.width = 240 * dpr;
-    canvas.height = H * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, 240, H);
     ctx.fillStyle = '#2a2a2a';
-    ctx.font = "9px 'DM Mono',monospace";
+    ctx.font = "11px 'DM Mono',monospace";
     ctx.textAlign = 'center';
-    ctx.fillText('No weight data', 120, H/2 - 6);
-    ctx.fillText('logged yet', 120, H/2 + 6);
+    ctx.fillText('No weight data yet — click any day to start logging', W/2, H/2);
     return;
   }
 
   const avgs = weeks.map(w => weekMap[w].reduce((a,b)=>a+b,0)/weekMap[w].length);
-  
-  // Calculate chart dimensions - much tighter spacing (2-3mm = ~8-12px at 96dpi)
-  const H = canvasId === 'weightChart' ? 120 : 140;
-  const pixelsPerWeek = 10; // Tight spacing - about 2.6mm at 96dpi
-  const W = weeks.length * pixelsPerWeek + 80; // +80 for padding
-  
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, W, H);
-
   const minV = Math.min(...avgs) - 0.8;
   const maxV = Math.max(...avgs) + 0.8;
   const range = maxV - minV || 1;
-  const pL=32, pR=10, pT=18, pB=20;
+  const pL=42, pR=14, pT=10, pB=26;
   const cW = W-pL-pR, cH = H-pT-pB;
   const xOf = i => pL + (weeks.length<2 ? cW/2 : (i/(weeks.length-1))*cW);
   const yOf = v => pT + cH - ((v-minV)/range)*cH;
@@ -1750,7 +1321,7 @@ function renderWeightChart(canvasId = 'weightChart') {
     const gv = minV + (range/3)*g, gy = yOf(gv);
     ctx.strokeStyle = '#1d1d1d'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(pL, gy); ctx.lineTo(W-pR, gy); ctx.stroke();
-    ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'right';
+    ctx.fillStyle = '#3a3a3a'; ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'right';
     ctx.fillText(gv.toFixed(1), pL-4, gy+3);
   }
 
@@ -1768,6 +1339,7 @@ function renderWeightChart(canvasId = 'weightChart') {
   ctx.stroke();
 
   // ── Per-year trend lines (resets each January) ──
+  // Group week indices by year, run a separate regression per year
   const yearGroups = {};
   weeks.forEach((w, i) => {
     const yr = w.slice(0, 4);
@@ -1799,103 +1371,26 @@ function renderWeightChart(canvasId = 'weightChart') {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // direction label at end of each segment
     const dir = slope > 0.05 ? '▲' : slope < -0.05 ? '▼' : '—';
     const col = slope > 0.05 ? '#ff7043' : slope < -0.05 ? '#4fc3f7' : '#555';
     ctx.fillStyle = col;
-    ctx.font = "7px 'DM Mono',monospace";
+    ctx.font = "8px 'DM Mono',monospace";
     ctx.textAlign = 'right';
-    ctx.fillText(dir, x1 - 2, y1 - 4);
+    ctx.fillText(dir, x1 - 2, y1 - 5);
   });
 
-  // ── Find peaks and troughs per month ──
-  const monthlyExtremes = {};
-  weeks.forEach((week, i) => {
-    const monthKey = week.slice(0, 7); // YYYY-MM
-    if (!monthlyExtremes[monthKey]) {
-      monthlyExtremes[monthKey] = { peak: { i: i, v: avgs[i] }, trough: { i: i, v: avgs[i] } };
-    } else {
-      if (avgs[i] > monthlyExtremes[monthKey].peak.v) {
-        monthlyExtremes[monthKey].peak = { i: i, v: avgs[i] };
-      }
-      if (avgs[i] < monthlyExtremes[monthKey].trough.v) {
-        monthlyExtremes[monthKey].trough = { i: i, v: avgs[i] };
-      }
-    }
-  });
-
-  // Draw peak/trough labels
-  Object.values(monthlyExtremes).forEach(({ peak, trough }) => {
-    if (peak.i === trough.i) {
-      ctx.fillStyle = '#c8ff00';
-      ctx.font = "8px 'DM Mono',monospace";
-      ctx.textAlign = 'center';
-      ctx.fillText(peak.v.toFixed(1), xOf(peak.i), yOf(peak.v) - 6);
-    } else {
-      ctx.fillStyle = '#ff7043';
-      ctx.font = "8px 'DM Mono',monospace";
-      ctx.textAlign = 'center';
-      ctx.fillText(peak.v.toFixed(1), xOf(peak.i), yOf(peak.v) - 6);
-      
-      ctx.fillStyle = '#4fc3f7';
-      ctx.fillText(trough.v.toFixed(1), xOf(trough.i), yOf(trough.v) + 10);
-    }
-  });
-
-  // Dots + x-axis labels with dd/mm/yy format and new year vertical line
-  const labelStep = Math.max(1, Math.floor(weeks.length/12));
-  let lastYear = null;
-  
+  // Dots + x-axis labels
+  const labelStep = Math.max(1, Math.floor(weeks.length/7));
   avgs.forEach((v,i) => {
-    const [year, month, day] = weeks[i].split('-');
-    
-    // Draw data point
-    ctx.beginPath(); 
-    ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
-    ctx.fillStyle = '#c8ff00'; 
-    ctx.fill();
-    
-    // Draw date label
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2);
+    ctx.fillStyle = '#c8ff00'; ctx.fill();
     if (i % labelStep === 0 || i === weeks.length-1) {
-      const yy = year.slice(2);
-      const dateLabel = `${day}/${month}/${yy}`;
-      
-      ctx.font = "7px 'DM Mono',monospace";
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#3a3a3a';
-      ctx.fillText(dateLabel, xOf(i), H-pB+10);
+      const p = weeks[i].split('-');
+      ctx.fillStyle = '#3a3a3a'; ctx.font = "8px 'DM Mono',monospace"; ctx.textAlign = 'center';
+      ctx.fillText(`${p[2]}/${p[1]}`, xOf(i), H-pB+12);
     }
-    
-    lastYear = year;
   });
-  
-  // Draw new year vertical lines (separate pass to ensure they appear)
-  let prevYear = null;
-  weeks.forEach((week, i) => {
-    const [year, month] = week.split('-');
-    
-    // Check if this is a new year AND we're in January
-    if (prevYear !== null && year !== prevYear && month === '01') {
-      // Draw vertical line at this position (first week of January in new year)
-      ctx.strokeStyle = '#c8ff00';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 2]);
-      ctx.beginPath();
-      ctx.moveTo(xOf(i), pT);
-      ctx.lineTo(xOf(i), H - pB);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-    
-    prevYear = year;
-  });
-  
-  // Scroll to right (most recent data) after rendering
-  const container = canvas.parentElement;
-  if (container) {
-    setTimeout(() => {
-      container.scrollLeft = container.scrollWidth;
-    }, 0);
-  }
 }
 
 // ══════════════════════════════
@@ -1906,6 +1401,7 @@ function toggleMode() {
   localStorage.setItem('tlog_mode', isLight ? 'light' : 'dark');
   updateModeToggle(isLight);
   if (document.getElementById('weightChart')) renderWeightChart();
+  if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
 }
 
 function updateModeToggle(isLight) {
@@ -1948,7 +1444,7 @@ function updateTodayBtn() {
   const ANGLE_THRESHOLD = 35;
 
   // Tab order for tab-swipe navigation
-  const TAB_IDS = ['calendar', 'overview', 'skills', 'milestones'];
+  const TAB_IDS = ['calendar', 'overview', 'skills'];
 
   function getActiveTab() {
     const active = document.querySelector('.nav-tab.active');
@@ -1974,14 +1470,6 @@ function updateTodayBtn() {
     const ref = document.getElementById('levelRefTableWrap');
     return ref && ref.contains(el);
   }
-  
-  function isInsideChartScroll(el) {
-    const scrollContainers = document.querySelectorAll('.chart-scroll-container');
-    for (let container of scrollContainers) {
-      if (container.contains(el)) return true;
-    }
-    return false;
-  }
 
   function onTouchStart(e) {
     touchStartX = e.touches[0].clientX;
@@ -1999,9 +1487,8 @@ function updateTodayBtn() {
     const calActive = document.getElementById('page-calendar').classList.contains('active');
     const skillsActive = document.getElementById('page-skills').classList.contains('active');
 
-    // Calendar tab: swipe on the grid = change month; swipe on chart = do nothing; swipe elsewhere = change tab
+    // Calendar tab: swipe on the grid = change month; swipe elsewhere = change tab
     if (calActive) {
-      if (isInsideChartScroll(touchStartTarget)) return; // Let chart scroll naturally
       if (isInsideCalGrid(touchStartTarget)) {
         changeMonth(dx < 0 ? 1 : -1);
       } else {
@@ -2037,7 +1524,6 @@ function openModal(k, mode) {
   document.getElementById('modalTitle').textContent = prettyDate(k);
   document.getElementById('modalWeight').value = rec.weight || '';
   document.getElementById('modalNotes').value = rec.notes || '';
-  document.getElementById('modalMilestone').value = rec.milestone || '';
   const mw = document.getElementById('modalWorkouts');
   mw.innerHTML = '';
   const ws = (rec.workouts && rec.workouts.length) ? rec.workouts : [''];
@@ -2047,12 +1533,10 @@ function openModal(k, mode) {
   const showWeight   = !mode || mode === 'weight';
   const showWorkouts = !mode || mode === 'workout';
   const showNotes    = !mode;
-  const showMilestone = !mode;
 
   document.getElementById('modalWeightSection').style.display   = showWeight   ? '' : 'none';
   document.getElementById('modalWorkoutsSection').style.display = showWorkouts ? '' : 'none';
   document.getElementById('modalNotesSection').style.display    = showNotes    ? '' : 'none';
-  document.getElementById('modalMilestoneSection').style.display = showMilestone ? '' : 'none';
 
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -2078,12 +1562,11 @@ async function saveModal() {
   if (!modalKey) return;
   const weight = document.getElementById('modalWeight').value;
   const notes  = document.getElementById('modalNotes').value;
-  const milestone = document.getElementById('modalMilestone').value;
   const workouts = Array.from(document.getElementById('modalWorkouts').querySelectorAll('select'))
     .map(s => s.value).filter(v => v !== '');
 
-  if (weight || workouts.length || notes || milestone) {
-    calData[modalKey] = { weight, workouts, notes, milestone };
+  if (weight || workouts.length || notes) {
+    calData[modalKey] = { weight, workouts, notes };
   } else {
     delete calData[modalKey];
   }
@@ -2511,10 +1994,9 @@ const DEFAULT_CONFIG = {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); hideSetupModal(); } });
 window.addEventListener('resize', () => {
-  if (document.getElementById('weightChart')) renderWeightChart('weightChart');
-  if (document.getElementById('weightChartNarrow')) renderWeightChart('weightChartNarrow');
+  if (document.getElementById('weightChart')) renderWeightChart();
   if (document.getElementById('page-skills').classList.contains('active')) renderSkillHistoryChart();
-  if (document.getElementById('page-overview').classList.contains('active')) renderMonthlyWeightChart();
+  if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
 });
 
 async function init() {
