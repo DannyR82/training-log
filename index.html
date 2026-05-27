@@ -1040,7 +1040,7 @@ function renderOverview() {
     const cx = pL + m * colW + colW / 2;
 
     if (isFuture) {
-      ctx.fillStyle = mutedCol + '44';
+      ctx.fillStyle = '#444';
       ctx.font = "9px 'DM Mono',monospace"; ctx.textAlign = 'center';
       ctx.fillText(MONTHS_SHORT[m], cx, pT + barH + 14);
       return;
@@ -1052,10 +1052,10 @@ function renderOverview() {
     const barW  = colW * 0.72;
     const barX  = cx - barW / 2;
 
-    // Workout bar (bottom, yellow-green)
+    // Workout bar (bottom, yellow-green) — same shade always
     if (d.workoutCount > 0) {
       const gy0 = pT + barH;
-      ctx.fillStyle = isCurrent ? 'rgba(200,255,0,0.85)' : 'rgba(200,255,0,0.55)';
+      ctx.fillStyle = 'rgba(200,255,0,0.85)';
       ctx.fillRect(barX, gy0 - workoutH, barW, workoutH);
       if (workoutH > 14) {
         ctx.fillStyle = '#0a0a0a';
@@ -1064,10 +1064,10 @@ function renderOverview() {
       }
     }
 
-    // Cycle bar (on top, amber)
+    // Cycle bar (on top, amber) — same shade always
     if (d.cycleCount > 0) {
       const cy0 = pT + barH - workoutH;
-      ctx.fillStyle = isCurrent ? 'rgba(251,191,36,0.9)' : 'rgba(251,191,36,0.65)';
+      ctx.fillStyle = 'rgba(251,191,36,0.9)';
       ctx.fillRect(barX, cy0 - cycleH, barW, cycleH);
       if (cycleH > 14) {
         ctx.fillStyle = '#0a0a0a';
@@ -1153,11 +1153,11 @@ function renderOverview() {
   const legend = document.getElementById('overviewLegend');
   legend.innerHTML = `
     <div class="overview-legend-item">
-      <div class="overview-legend-swatch" style="background:rgba(200,255,0,0.55)"></div>
+      <div class="overview-legend-swatch" style="background:rgba(200,255,0,0.85)"></div>
       Workouts
     </div>
     <div class="overview-legend-item">
-      <div class="overview-legend-swatch" style="background:rgba(251,191,36,0.65)"></div>
+      <div class="overview-legend-swatch" style="background:rgba(251,191,36,0.9)"></div>
       Cycle commutes
     </div>
     <div class="overview-legend-item">
@@ -1397,7 +1397,7 @@ function renderWeightChart() {
   const range = maxV - minV || 1;
 
   // Tight spacing — ~10px per week
-  const pixelsPerWeek = 5;
+  const pixelsPerWeek = 7;
   const W = weeks.length * pixelsPerWeek + 60;
 
   canvas.width  = W * dpr;
