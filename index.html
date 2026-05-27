@@ -24,25 +24,6 @@
     --c-leg: #ce93d8;
     --c-nordic: #a78bca;
   }
-  body.light {
-    --bg: #f4f4f0;
-    --surface: #ffffff;
-    --surface2: #efefeb;
-    --surface3: #e8e8e4;
-    --border: #ddddd8;
-    --border2: #ccccC6;
-    --accent: #5a8a00;
-    --text: #1a1a1a;
-    --muted: #888;
-    --muted2: #bbb;
-  }
-  body.light .day-cell.today { background: #f0f8e0; }
-  body.light .chart-card-title, body.light .stat-label { color: var(--muted); }
-  body.light .mscard-bar-fill.workouts-fill { background: linear-gradient(90deg,#4a9a4a,#5a8a00); }
-  body.light .badge-vp { background: rgba(79,195,247,0.15); }
-  body.light .badge-hp { background: rgba(255,112,67,0.15); }
-  body.light .badge-vc { background: rgba(129,212,250,0.12); }
-  body.light .badge-leg { background: rgba(206,147,216,0.15); }
 
   /* FOOTER TOOLBAR */
   .page-footer {
@@ -67,24 +48,6 @@
     color: var(--muted);
     margin-right: 2px;
   }
-  .mode-toggle {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    border: 1px solid var(--border2);
-    padding: 6px 12px;
-    transition: all 0.15s;
-    user-select: none;
-    background: transparent;
-  }
-  .mode-toggle:hover { border-color: var(--accent); color: var(--accent); }
-  .mode-toggle-icon { font-size: 13px; line-height: 1; }
-
   @media (max-width: 600px) {
     .page-footer { gap: 6px; }
     .footer-group { gap: 5px; }
@@ -622,10 +585,6 @@
           <span class="footer-label">Import</span>
           <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
           <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
-          <button class="mode-toggle" onclick="toggleMode()" id="modeToggle">
-            <span class="mode-toggle-icon" id="modeIcon">☀︎</span>
-            <span id="modeLabel">Day</span>
-          </button>
         </div>
       </div>
     </div>
@@ -656,10 +615,6 @@
         <span class="footer-label">Import</span>
         <button class="btn" onclick="triggerImportCSV()">Import CSV</button>
         <button class="btn" onclick="triggerImportJSON()">Import JSON</button>
-        <button class="mode-toggle" onclick="toggleMode()" id="modeToggleNarrow">
-          <span class="mode-toggle-icon" id="modeIconNarrow">☀︎</span>
-          <span id="modeLabelNarrow">Day</span>
-        </button>
       </div>
     </div>
   </div>
@@ -1033,7 +988,9 @@ function renderOverview() {
       if (hist.length) skillSum += hist[hist.length-1].level;
     });
 
-    monthData.push({ avgWeight, workoutCount, cycleCount, skillSum });
+    const sickCount = monthKeys.reduce((n,k) => n + ((calData[k].workouts||[]).filter(w=>w==='sick').length), 0);
+
+    monthData.push({ avgWeight, workoutCount, cycleCount, skillSum, sickCount });
   }
 
   // ── Max values for scaling ──
@@ -1050,7 +1007,7 @@ function renderOverview() {
   const pL     = 0;    // no y-axis
   const pR     = 6;
   const pT     = 56;   // top padding for weight overlay labels
-  const pB     = 38;   // bottom padding for skill sum + month labels
+  const pB     = 48;   // bottom padding for skill sum + sick dot + month labels
   const barH   = 180;  // height of the bar chart area
   const totalH = pT + barH + pB;
   const totalW = containerW;
@@ -1137,6 +1094,14 @@ function renderOverview() {
       ctx.font = "bold 9px 'DM Mono',monospace"; ctx.textAlign = 'center';
       ctx.fillText(d.skillSum, cx, pT + barH + 28);
     }
+
+    // Sick indicator — red dot below skill sum
+    if (d.sickCount > 0) {
+      ctx.beginPath();
+      ctx.arc(cx, pT + barH + 38, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+    }
   });
 
   // ── Weight overlay line (yellow-green) ──
@@ -1201,6 +1166,10 @@ function renderOverview() {
     </div>
     <div class="overview-legend-item" style="color:#c8ff00;font-weight:bold">
       Σ skill level sum
+    </div>
+    <div class="overview-legend-item">
+      <div class="overview-legend-dot" style="background:#ef4444"></div>
+      Sick day(s)
     </div>`;
 
   // ── Click to jump to month ──
@@ -1428,11 +1397,13 @@ function renderWeightChart() {
   const range = maxV - minV || 1;
 
   // Tight spacing — ~10px per week
-  const pixelsPerWeek = 10;
-  const W = weeks.length * pixelsPerWeek + 80;
+  const pixelsPerWeek = 5;
+  const W = weeks.length * pixelsPerWeek + 60;
 
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
@@ -1596,6 +1567,8 @@ function renderMonthlyWeightChart() {
 
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
@@ -1684,30 +1657,6 @@ function renderMonthlyWeightChart() {
     setTimeout(() => { container.scrollLeft = container.scrollWidth; }, 0);
   }
 }
-function toggleMode() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('tlog_mode', isLight ? 'light' : 'dark');
-  updateModeToggle(isLight);
-  renderWeightChart();
-  if (document.getElementById('page-overview').classList.contains('active')) { renderOverview(); renderMonthlyWeightChart(); }
-}
-
-function updateModeToggle(isLight) {
-  [['modeIcon','modeLabel'],['modeIconNarrow','modeLabelNarrow']].forEach(([iId,lId]) => {
-    const icon  = document.getElementById(iId);
-    const label = document.getElementById(lId);
-    if (icon)  icon.textContent  = isLight ? '🌙' : '☀︎';
-    if (label) label.textContent = isLight ? 'Night' : 'Day';
-  });
-}
-
-function applyStoredMode() {
-  const stored = localStorage.getItem('tlog_mode');
-  if (stored === 'light') {
-    document.body.classList.add('light');
-    updateModeToggle(true);
-  }
-}
 function goToToday() {
   const now = new Date();
   cy = now.getFullYear();
@@ -1778,12 +1727,14 @@ function updateTodayBtn() {
     const isHorizontal = angle < ANGLE_THRESHOLD || angle > (180 - ANGLE_THRESHOLD);
     if (!isHorizontal || Math.abs(dx) < SWIPE_THRESHOLD) return;
 
+    // Never change tab when swiping inside a scrollable chart
+    if (isInsideChartScroll(touchStartTarget)) return;
+
     const calActive = document.getElementById('page-calendar').classList.contains('active');
     const skillsActive = document.getElementById('page-skills').classList.contains('active');
 
-    // Calendar tab: swipe on the grid = change month; swipe on chart scroll = do nothing; swipe elsewhere = change tab
+    // Calendar tab: swipe on the grid = change month; swipe elsewhere = change tab
     if (calActive) {
-      if (isInsideChartScroll(touchStartTarget)) return;
       if (isInsideCalGrid(touchStartTarget)) {
         changeMonth(dx < 0 ? 1 : -1);
       } else {
@@ -2343,7 +2294,6 @@ window.addEventListener('resize', () => {
 });
 
 async function init() {
-  applyStoredMode();
   // Use stored config if present, otherwise fall back to embedded defaults
   cloudConfig = loadConfig() || DEFAULT_CONFIG;
   cacheLoad();
