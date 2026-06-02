@@ -1478,7 +1478,9 @@ function renderWeightChart() {
     ctx.beginPath();
     ctx.arc(xOf(i), yOf(v), 2, 0, Math.PI*2);
     ctx.fillStyle = '#c8ff00'; ctx.fill();
-    if (peakTrough[i] && i - lastLabelledAt >= minGap) {
+    const isLast = i === avgs.length - 1;
+    const isPeakOrTrough = peakTrough[i] && i - lastLabelledAt >= minGap;
+    if (isLast || isPeakOrTrough) {
       lastLabelledAt = i;
       const isPeak = avgs[i] > (avgs[i-1] ?? avgs[i]);
       ctx.fillStyle = '#c8ff00';
@@ -1627,7 +1629,9 @@ function renderMonthlyWeightChart() {
   avgs.forEach((v, i) => {
     ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 1.5, 0, Math.PI*2);
     ctx.fillStyle = '#c8ff00'; ctx.fill();
-    if (peakTroughM[i] && i - lastLabelledAtM >= minGapM) {
+    const isLastM = i === avgs.length - 1;
+    const isPeakOrTroughM = peakTroughM[i] && i - lastLabelledAtM >= minGapM;
+    if (isLastM || isPeakOrTroughM) {
       lastLabelledAtM = i;
       const isPeak = avgs[i] > (avgs[i-1] ?? avgs[i]);
       ctx.fillStyle = '#c8ff00';
